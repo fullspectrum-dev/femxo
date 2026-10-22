@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ClipboardEvent, FormEvent, KeyboardEvent } from "react";
 import { isAuthDemoMode } from "../services/demo-mode";
+import type { AuthPortalType } from "../types/auth";
 import {
   AuthScreen,
   authApi,
@@ -18,7 +19,13 @@ export function OtpVerificationForm() {
   const router = useRouter();
   const { challenge, replaceChallenge, setResetGrant, completeSignIn, clearAuthFlow } =
     useAuthFlow();
-  const accountType = challenge?.accountType ?? "customer";
+  // Registration success clears the flow, so keep the account type for the
+  // follow-up sign-in link.
+  const [verifiedAccountType, setVerifiedAccountType] =
+    useState<AuthPortalType | null>(null);
+  const accountType: AuthPortalType =
+    verifiedAccountType ?? challenge?.accountType ?? "customer";
+  const loginHref = `/${getAuthPortalSlug(accountType) ?? "customer"}/login`;
   const refs = useRef<Array<HTMLInputElement | null>>([]);
   const [digits, setDigits] = useState<string[]>(
     challenge?.demo ? Array.from("123456") : Array(6).fill("")
@@ -112,6 +119,7 @@ export function OtpVerificationForm() {
         router.push(`/${portalSlug}/coming-soon`);
         return;
       }
+      setVerifiedAccountType(challenge.accountType);
       clearAuthFlow();
       setSuccessMessage(
         challenge.demo
@@ -183,10 +191,7 @@ export function OtpVerificationForm() {
           <div className="auth-form-success">
             <CheckCircle2 size={18} aria-hidden="true" /> {successMessage}
           </div>
-          <Link
-            className="auth-button"
-            href={`/${accountType ? getAuthPortalSlug(accountType) ?? "customer" : "customer"}/login`}
-          >
+          <Link className="auth-button" href={loginHref}>
             Continue to sign in <ArrowRight size={17} aria-hidden="true" />
           </Link>
         </div>
@@ -248,10 +253,7 @@ export function OtpVerificationForm() {
             </>
           )}
           <div className="auth-inline-row">
-            <Link
-              className="auth-link"
-              href={`/${accountType ? getAuthPortalSlug(accountType) ?? "customer" : "customer"}/login`}
-            >
+            <Link className="auth-link" href={loginHref}>
               <ArrowLeft size={14} aria-hidden="true" /> Back to sign in
             </Link>
             {challenge?.purpose === "password_reset" && (

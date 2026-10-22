@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { connection } from "next/server";
@@ -40,9 +41,14 @@ const SOCIALS = [
   { icon: CirclePlay, href: "https://youtube.com", label: "YouTube" },
 ];
 
-export async function Footer() {
+// Only the year needs request time; keeping it in its own Suspense boundary
+// lets the rest of the footer stay in the prerendered shell.
+async function CurrentYear() {
   await connection();
+  return new Date().getFullYear();
+}
 
+export function Footer() {
   return (
     <footer className="border-t border-border/50 bg-background">
       <Container className="py-14">
@@ -109,7 +115,11 @@ export async function Footer() {
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border/50 pt-8 sm:flex-row">
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Femxo Consultancy Services Pvt. Ltd. All
+            ©{" "}
+            <Suspense fallback={null}>
+              <CurrentYear />
+            </Suspense>{" "}
+            Femxo Consultancy Services Pvt. Ltd. All
             rights reserved.
           </p>
           <p className="text-xs text-muted-foreground">

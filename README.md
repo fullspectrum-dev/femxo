@@ -46,7 +46,7 @@ pnpm build
 pnpm start
 ```
 
-Deploy `apps/web` as a Node.js web service. Run the workspace install before
+Deploy this project as a Node.js web service. Run `pnpm install` before
 building, provide only public configuration at build time, and set server-only
 secrets in the deployment platform's secret manager. Do not expose the NestJS
 API's private credentials to this client-side app.
@@ -95,8 +95,8 @@ user; the UI maps HTTP statuses to safe, generic messages.
 When demo mode is disabled, the API base URL includes `/api/auth`; append the
 paths in the table to that base. `purpose` is `login`, `registration`, or `password_reset`. Login, OTP
 verification/resend, and password-recovery requests include an `accountType`
-matching the selected portal (`dealer`, `sub_dealer`, `customer`, or
-`retail_partner`, `customer`, or `super_admin`). Public registration accepts
+matching the selected portal (`dealer`, `sub_dealer`, `retail_partner`,
+`customer`, or `super_admin`). Public registration accepts
 only `dealer`, `sub_dealer`, `retail_partner`, or `customer`; the server must
 reject `super_admin` registration regardless of the client UI.
 
@@ -160,7 +160,7 @@ pnpm test
 pnpm exec playwright install chromium
 pnpm test:e2e
 pnpm test:e2e:demo
-pnpm build:web
+pnpm build
 ```
 
 The regular Playwright flow tests disable demo mode and stub API responses to

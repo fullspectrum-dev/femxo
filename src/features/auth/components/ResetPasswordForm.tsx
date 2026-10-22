@@ -21,10 +21,15 @@ import { isAuthDemoMode } from "../services/demo-mode";
 export function ResetPasswordForm() {
   const router = useRouter();
   const { challenge, resetGrant, setResetGrant, clearAuthFlow } = useAuthFlow();
-  const accountType: AuthPortalType = challenge?.accountType ?? "customer";
+  // Clearing the flow on success drops the challenge, so remember whose
+  // password was reset to keep linking to that portal's sign-in.
+  const [completedAccountType, setCompletedAccountType] =
+    useState<AuthPortalType | null>(null);
+  const success = completedAccountType !== null;
+  const accountType: AuthPortalType =
+    completedAccountType ?? challenge?.accountType ?? "customer";
   const portalSlug = getAuthPortalSlug(accountType) ?? "customer";
   const [serverError, setServerError] = useState("");
-  const [success, setSuccess] = useState(false);
   const {
     register,
     handleSubmit,
@@ -50,7 +55,7 @@ export function ResetPasswordForm() {
         password: values.password,
       });
       setResetGrant(null);
-      setSuccess(true);
+      setCompletedAccountType(accountType);
       clearAuthFlow();
     } catch (error) {
       setServerError(

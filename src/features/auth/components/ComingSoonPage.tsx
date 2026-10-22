@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { ArrowLeft, ArrowUpRight, BellRing, Clock3, ShieldCheck, Sparkles } from "lucide-react";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
@@ -12,14 +13,15 @@ import type { AuthPortal } from "../utils/auth-portals";
 import { useAuthFlow } from "./AuthFlowProvider";
 
 export function ComingSoonPage({ portal }: { portal: AuthPortal }) {
+  const router = useRouter();
   const { signedInAccountType } = useAuthFlow();
   const isAuthorized = signedInAccountType === portal.accountType;
-  const loginHref = `/${getAuthPortalSlug(portal.accountType) ?? "login"}/login`;
+  const loginHref = `/${getAuthPortalSlug(portal.accountType) ?? "customer"}/login`;
 
   useEffect(() => {
     if (isAuthorized) return;
-    window.location.replace(loginHref);
-  }, [isAuthorized, loginHref]);
+    router.replace(loginHref);
+  }, [isAuthorized, loginHref, router]);
 
   if (!isAuthorized) return <AuthPortalLoading />;
 

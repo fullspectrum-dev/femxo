@@ -80,4 +80,7 @@ test("registration finishes in demo mode with the visible demo code", async ({
       hasText: "Demo account created in memory for this session only",
     })
   ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Continue to sign in" })
+  ).toHaveAttribute("href", "/dealer/login");
 });
