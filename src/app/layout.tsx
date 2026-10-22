@@ -31,20 +31,26 @@ const themeInitializationScript = `
   }
 `;
 
+// The home page title: the brand first, then what people search for.
+const HOME_TITLE = `${SITE.name} | Digitising Bihar's Local Businesses`;
+
 const DESCRIPTION =
-  "Femxo Consultancy Services is a Bihar-based commerce, distribution and technology network. E-commerce, ERP and agentic AI to build 1 lakh+ local entrepreneurs across all 38 districts of Bihar.";
+  "Femxo Consultancy Services (femxo.in) takes Bihar's local businesses digital: e-commerce, dealer distribution, ERP and agentic AI, building 1 lakh+ local entrepreneurs across all 38 districts of Bihar.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
-    default: SITE.name,
+    default: HOME_TITLE,
     template: `%s | ${SITE.name}`,
   },
   description: DESCRIPTION,
   applicationName: SITE.name,
   keywords: [
     "Femxo",
+    "femxo.in",
     "Femxo Consultancy Services",
+    "Bihar local businesses digital",
+    "digital solutions for Bihar businesses",
     "Bihar business network",
     "ERP India",
     "dealer management",
@@ -63,7 +69,7 @@ export const metadata: Metadata = {
     locale: "en_IN",
     url: SITE.url,
     siteName: SITE.name,
-    title: SITE.name,
+    title: HOME_TITLE,
     description: DESCRIPTION,
     images: [
       {
@@ -76,7 +82,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: SITE.name,
+    title: HOME_TITLE,
     description: DESCRIPTION,
     images: ["/images/og-image.png"],
   },
@@ -112,14 +118,17 @@ const STRUCTURED_DATA = {
       "@id": `${SITE.url}/#website`,
       url: SITE.url,
       name: SITE.name,
-      alternateName: [SITE.shortName, "Femxo", "femxo.in"],
+      alternateName: [SITE.shortName, "femxo.in", "FEMXO"],
+      inLanguage: "en-IN",
       publisher: { "@id": `${SITE.url}/#organization` },
     },
     {
       "@type": "Organization",
       "@id": `${SITE.url}/#organization`,
       name: SITE.name,
-      alternateName: SITE.shortName,
+      legalName: `${SITE.name} Private Limited`,
+      alternateName: [SITE.shortName, "FEMXO"],
+      slogan: "Digitising Bihar's Local Businesses",
       url: SITE.url,
       logo: `${SITE.url}/icons/icon-512.png`,
       description: DESCRIPTION,
@@ -133,6 +142,7 @@ const STRUCTURED_DATA = {
         addressCountry: "IN",
       },
       areaServed: { "@type": "State", name: "Bihar" },
+      knowsAbout: ["E-commerce", "Dealer distribution", "ERP", "Agentic AI", "Digital transformation for local businesses"],
     },
   ],
 };

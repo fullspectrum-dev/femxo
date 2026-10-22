@@ -44,7 +44,7 @@ export function Hero() {
       <Container className="relative">
         <div className="grid min-w-0 items-center gap-14 pb-16 lg:grid-cols-[1.05fr_1fr] lg:pb-24">
           <div className="min-w-0">
-            <p className="eyebrow">Startup Bihar · Local commerce network</p>
+            <p className="eyebrow">Femxo Consultancy Services · Startup Bihar</p>
 
             <h1
               id="hero-heading"
@@ -55,8 +55,9 @@ export function Hero() {
             </h1>
 
             <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Distribution, ERP and AI in one connected system, built to help
-              1,00,000 businesses grow - from Patna to the smallest village.
+              Femxo takes Bihar&rsquo;s local businesses digital: distribution, ERP and AI in
+              one connected system, built to help 1,00,000 businesses grow - from Patna
+              to the smallest village.
             </p>
 
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
