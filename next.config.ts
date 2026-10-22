@@ -61,12 +61,6 @@ const nextConfig: NextConfig = {
               "./src/features/auth/services/demo-backend-disabled.ts",
           }
         : {},
-    rules: {
-      "*.css": {
-        loaders: ["@tailwindcss/turbopack"],
-        as: "*.css",
-      },
-    },
   },
 };
 
