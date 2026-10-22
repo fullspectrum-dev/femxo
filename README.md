@@ -16,9 +16,10 @@ Copy-Item .env.example .env.local
 pnpm dev
 ```
 
-Open `http://localhost:3001`. Development runs in **demo mode** by default: sign-in
-runs in the browser with test accounts, so no backend is needed. To use the real
-API, start femxo-backend on port 3000 and set `NEXT_PUBLIC_AUTH_DEMO_MODE=false`.
+Open `http://localhost:3001`. The site runs on **dummy data** (demo mode) by
+default, locally and in production: sign-in runs in the browser with test
+accounts and no backend is called. To connect femxo-backend later, start it,
+set `NEXT_PUBLIC_AUTH_DEMO_MODE=false` and `FEMXO_API_ORIGIN`, and rebuild.
 Restart `pnpm dev` after changing `next.config.ts` or `.env.local`.
 
 ## Routes
@@ -39,9 +40,9 @@ on) redirect to these.
 
 | Variable | When | Purpose |
 |---|---|---|
-| `FEMXO_API_ORIGIN` | build | Where femxo-backend runs. The site forwards `/auth`, `/access` and `/territories` to it. Default `http://localhost:3000`. |
+| `FEMXO_API_ORIGIN` | build | Where femxo-backend runs. Once connected, the site forwards `/auth`, `/access` and `/territories` to it. Default `http://localhost:3000`. |
 | `NEXT_PUBLIC_API_BASE_URL` | build | Optional. Call the API origin directly instead of through the forwarding. |
-| `NEXT_PUBLIC_AUTH_DEMO_MODE` | build | `true` for in-browser demo sign-in. On in development, off in production builds unless set to `true`. |
+| `NEXT_PUBLIC_AUTH_DEMO_MODE` | build | Leave unset for dummy data (the default everywhere). Set `false` to connect the backend. |
 
 All three are read at build time: rewrites and `NEXT_PUBLIC_*` values are baked
 into the build. None of them is a secret; never put secrets in `NEXT_PUBLIC_*`.
@@ -87,8 +88,8 @@ Warehouse, Dealer, Field staff, Sub-dealer, Customer) and a "First sign-in"
 account that must change its password. The demo
 ([demo-backend.ts](src/features/auth/services/demo-backend.ts)) answers with the
 backend's shapes and error codes. Its passwords are public and grant nothing.
-Production builds replace it with a stub unless demo mode is explicitly on, so
-the demo accounts never ship by accident.
+Once the backend is connected (`NEXT_PUBLIC_AUTH_DEMO_MODE=false`), production
+builds replace it with a stub, so the demo accounts don't ship alongside real ones.
 
 ## Quality checks
 

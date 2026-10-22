@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
-const productionDemoModeEnabled =
-  process.env.NEXT_PUBLIC_AUTH_DEMO_MODE === "true";
+// Dummy data (demo mode) is the default until the backend is connected; see
+// src/features/auth/services/demo-mode.ts. Must match the check there.
+const backendConnected = process.env.NEXT_PUBLIC_AUTH_DEMO_MODE === "false";
 
 // Where femxo-backend runs. The browser calls /auth, /access and /territories
 // on this site and Next forwards them, so the API's refresh cookie
@@ -37,6 +38,8 @@ const nextConfig: NextConfig = {
     return [{ source: "/:path*", headers: SECURITY_HEADERS }];
   },
   async rewrites() {
+    // Nothing to forward to while the site runs on dummy data.
+    if (!backendConnected) return [];
     return ["auth", "access", "territories"].map((prefix) => ({
       source: `/${prefix}/:path*`,
       destination: `${apiOrigin}/${prefix}/:path*`,
@@ -55,7 +58,8 @@ const nextConfig: NextConfig = {
   },
   turbopack: {
     resolveAlias:
-      process.env.NODE_ENV === "production" && !productionDemoModeEnabled
+      // Once connected, production builds drop the demo accounts entirely.
+      process.env.NODE_ENV === "production" && backendConnected
         ? {
             "@/features/auth/services/demo-backend":
               "./src/features/auth/services/demo-backend-disabled.ts",
