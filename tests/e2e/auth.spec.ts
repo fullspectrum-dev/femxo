@@ -1,247 +1,187 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page, type Route } from "@playwright/test";
 
-const challengeResponse = {
-  challengeId: "e2e-challenge-id",
-  expiresInSeconds: 300,
-  resendAfterSeconds: 30,
-  maskedDestination: "+91 ••••••3210",
+// Runs with demo mode off, against a mocked femxo-backend: page.route answers
+// /auth, /access and /territories the way the real API does.
+
+const baseUser = {
+  id: "665f00000000000000000001",
+  email: "asha@example.com",
+  name: "Asha Kumar",
+  isSuperAdmin: false,
+  status: "active",
+  mustChangePassword: false,
+  createdAt: "2026-10-21T09:00:00.000Z",
 };
 
-test("auth portals render without horizontal overflow", async ({
-  page,
-}) => {
-  test.setTimeout(180_000);
+const json = (route: Route, status: number, body: unknown, headers: Record<string, string> = {}) =>
+  route.fulfill({ status, contentType: "application/json", headers, body: JSON.stringify(body) });
+const apiError = (route: Route, status: number, code: string, headers?: Record<string, string>) =>
+  json(route, status, { error: { code, message: code } }, headers);
+
+interface MockOptions {
+  mustChangePassword?: boolean;
+  loginError?: { status: number; code: string; headers?: Record<string, string> };
+  passwordError?: { status: number; code: string };
+}
+
+/** A tiny stateful backend: a session exists after login, until logout. */
+async function mockBackend(page: Page, options: MockOptions = {}) {
+  const state = { signedIn: false, user: { ...baseUser, mustChangePassword: Boolean(options.mustChangePassword) } };
+  const calls: string[] = [];
+
+  await page.route(/\/(auth|access|territories)\//, async (route) => {
+    const request = route.request();
+    const path = new URL(request.url()).pathname;
+    calls.push(`${request.method()} ${path}`);
+
+    switch (`${request.method()} ${path}`) {
+      case "POST /auth/login":
+        if (options.loginError) {
+          return apiError(route, options.loginError.status, options.loginError.code, options.loginError.headers);
+        }
+        state.signedIn = true;
+        return json(route, 200, { accessToken: "token", expiresIn: 900, user: state.user });
+      case "POST /auth/refresh":
+        return state.signedIn
+          ? json(route, 200, { accessToken: "token", expiresIn: 900 })
+          : apiError(route, 401, "UNAUTHENTICATED");
+      case "POST /auth/logout":
+        state.signedIn = false;
+        return route.fulfill({ status: 204 });
+      case "GET /auth/me":
+        return json(route, 200, { user: state.user });
+      case "POST /auth/password":
+        if (options.passwordError) return apiError(route, options.passwordError.status, options.passwordError.code);
+        state.user = { ...state.user, mustChangePassword: false };
+        return route.fulfill({ status: 204 });
+      case "GET /access/me":
+        return json(route, 200, {
+          isSuperAdmin: false,
+          permissions: ["user.manage", "user.view"],
+          roles: ["Dealer"],
+          territoryIds: ["district:230"],
+          locationIds: ["district:230"],
+        });
+      case "GET /territories/district%3A230":
+      case "GET /territories/district:230":
+        return json(route, 200, {
+          territory: { id: "district:230", type: "district", name: "Purbi Champaran" },
+          ancestors: [{ id: "state:10", type: "state", name: "Bihar" }],
+        });
+      default:
+        return apiError(route, 404, "NOT_FOUND");
+    }
+  });
+  return calls;
+}
+
+async function signIn(page: Page, password = "CorrectHorse1") {
+  await page.getByLabel("Email address").fill(baseUser.email);
+  await page.getByLabel("Password", { exact: true }).fill(password);
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+}
+
+test("auth pages fit every screen width", async ({ page }) => {
+  test.setTimeout(120_000);
+  await mockBackend(page);
   const routes = [
-    ["/customer/register", "Create your customer account"],
-    ["/dealer/register", "Create your Dealer account"],
-    ["/customer/login", "Customer sign in"],
-    ["/dealer/login", "Dealer sign in"],
-    ["/sub-dealer/login", "Sub-dealer sign in"],
-    ["/retail-partner/login", "Retail Partner sign in"],
-    ["/super-admin/login", "Super Admin sign in"],
-    ["/verify-otp", "Check your messages"],
-    ["/customer/forgot-password", "Let’s get you back in"],
-    ["/reset-password", "Choose a new password"],
+    ["/login", "Sign in to Femxo"],
+    ["/forgot-password", "Forgot your password?"],
   ] as const;
 
-  await page.setViewportSize({ width: 360, height: 900 });
-  for (const [route, heading] of routes) {
-    await page.goto(route);
-    await expect(page.getByRole("heading", { name: heading })).toBeVisible();
-    const hasNoHorizontalOverflow = await page.evaluate(
-      () => document.documentElement.scrollWidth <= window.innerWidth
-    );
-    expect(hasNoHorizontalOverflow, `${route} overflows at 360px`).toBe(true);
-  }
-
-  const representativeRoutes = [
-    ["/customer/login", "Customer sign in"],
-    ["/dealer/login", "Dealer sign in"],
-    ["/customer/register", "Create your customer account"],
-  ] as const;
-  for (const width of [768, 1024, 1440]) {
+  for (const width of [360, 768, 1024, 1440]) {
     await page.setViewportSize({ width, height: 900 });
-    for (const [route, heading] of representativeRoutes) {
+    for (const [route, heading] of routes) {
       await page.goto(route);
       await expect(page.getByRole("heading", { name: heading })).toBeVisible();
-      const hasNoHorizontalOverflow = await page.evaluate(
-        () => document.documentElement.scrollWidth <= window.innerWidth
-      );
-      expect(hasNoHorizontalOverflow, `${route} overflows at ${width}px`).toBe(
-        true
-      );
+      const fits = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
+      expect(fits, `${route} overflows at ${width}px`).toBe(true);
     }
   }
 });
 
-test("portal chooser separates customer, partner, and provisioned admin access", async ({
-  page,
-}) => {
-  await page.goto("/login");
-  await expect(page.getByRole("link", { name: /Customer/ })).toHaveAttribute(
-    "href",
-    "/customer/login"
-  );
-  await expect(page.getByRole("link", { name: /Dealer/ })).toHaveAttribute(
-    "href",
-    "/dealer/login"
-  );
-  await expect(page.getByRole("link", { name: /Sub-dealer/ })).toHaveAttribute(
-    "href",
-    "/sub-dealer/login"
-  );
-  await expect(page.getByRole("link", { name: /Retail Partner/ })).toHaveCount(0);
-  await expect(page.getByRole("link", { name: /Super Admin/ })).toContainText(
-    "invitation required"
-  );
-  await page.goto("/register");
-  await expect(page.getByRole("link", { name: /Customer/ })).toHaveAttribute(
-    "href",
-    "/customer/register"
-  );
-  await expect(page.getByRole("link", { name: /^Admin/ })).toHaveAttribute(
-    "href",
-    "/super-admin/login"
-  );
-  await expect(page.getByRole("link", { name: /^Admin/ })).toContainText(
-    "invitation required"
-  );
-  await expect(page.getByRole("link", { name: /Retail Partner/ })).toHaveCount(0);
-  await page.goto("/forgot-password");
-  await expect(
-    page.getByRole("link", { name: /Retail Partner/ })
-  ).toHaveAttribute("href", "/retail-partner/forgot-password");
-  await page.goto("/retail-partner/login");
-  await expect(
-    page.getByRole("heading", { name: "Retail Partner sign in" })
-  ).toBeVisible();
-});
-
-test("public role registration is fixed to its own account type", async ({
-  page,
-}) => {
-  await page.goto("/dealer/register");
-  const accountType = page.locator(".auth-account-type");
-  await expect(accountType).toContainText("Dealer");
-  await expect(accountType.locator("select")).toHaveCount(0);
-  await page.getByRole("button", { name: "Create account" }).click();
-  await expect(
-    page.getByText("Enter your full name.", { exact: true })
-  ).toBeVisible();
-});
-
-test("theme preference applies on auth screens without persisting auth data", async ({
-  page,
-}) => {
-  await page.addInitScript(() => {
-    localStorage.setItem("femxo-theme", "light");
-  });
-  await page.goto("/login");
-  await page.getByRole("button", { name: "Switch to dark mode" }).click();
-
-  await expect(page.locator("html")).toHaveClass(/dark/);
-  await expect(
-    page.getByRole("button", { name: "Switch to light mode" })
-  ).toBeVisible();
-  const storedKeys = await page.evaluate(() => Object.keys(localStorage));
-  expect(storedKeys).toEqual(["femxo-theme"]);
-});
-
-test("mobile OTP sign-in verifies a pasted six-digit code", async ({ page }) => {
-  const initialChallenge = { ...challengeResponse, resendAfterSeconds: 0 };
-  await page.route("**/api/auth/login/otp", async (route) => {
-    expect(route.request().postDataJSON()).toMatchObject({
-      mobile: "9876543210",
-      accountType: "customer",
-    });
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify(initialChallenge),
-    });
-  });
-  await page.route("**/api/auth/otp/resend", async (route) => {
-    expect(route.request().postDataJSON()).toMatchObject({
-      challengeId: initialChallenge.challengeId,
-      purpose: "login",
-    });
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({
-        ...challengeResponse,
-        challengeId: "resent-e2e-challenge-id",
-      }),
-    });
-  });
-  await page.route("**/api/auth/otp/verify", async (route) => {
-    expect(route.request().postDataJSON()).toMatchObject({
-      challengeId: "resent-e2e-challenge-id",
-      code: "123456",
-      purpose: "login",
-    });
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({ verified: true }),
-    });
-  });
-
-  await page.goto("/customer/login");
-  await page.getByLabel("Mobile number").fill("9876543210");
-  await page.getByRole("button", { name: "Continue with mobile" }).click();
-  await expect(page).toHaveURL(/\/verify-otp$/);
-  await expect(page.getByText(/sent to \+91/)).toBeVisible();
-
-  const digits = page.getByRole("group", { name: "6-digit verification code" });
-  await page.getByRole("button", { name: "Resend code" }).click();
-  await page.evaluate(() => navigator.clipboard.writeText("123456"));
-  await digits
-    .getByRole("textbox", { name: "Verification code digit 1" })
-    .focus();
-  await page.keyboard.press("Control+V");
-  await page.getByRole("button", { name: "Verify code" }).click();
-  await expect(page).toHaveURL(/\/customer\/coming-soon$/);
-  await expect(page.locator(".coming-soon-security")).toContainText(
-    "signed in to the Customer experience"
-  );
-});
-
-test("password recovery verifies OTP and updates the password through the API", async ({
-  page,
-}) => {
-  await page.route("**/api/auth/password/recovery", async (route) => {
-    expect(route.request().postDataJSON()).toMatchObject({
-      identifier: "asha@example.com",
-      accountType: "customer",
-    });
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify(challengeResponse),
-    });
-  });
-  await page.route("**/api/auth/otp/verify", async (route) => {
-    expect(route.request().postDataJSON()).toMatchObject({
-      challengeId: challengeResponse.challengeId,
-      code: "654321",
-      purpose: "password_reset",
-    });
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({ verified: true, resetGrant: "e2e-short-lived-grant" }),
-    });
-  });
-  await page.route("**/api/auth/password/reset", async (route) => {
-    expect(route.request().postDataJSON()).toMatchObject({
-      resetGrant: "e2e-short-lived-grant",
-      password: "NewSecurePass123",
-    });
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({ updated: true }),
-    });
-  });
-
-  await page.goto("/customer/forgot-password");
-  await page.getByLabel("Mobile number or email").fill("asha@example.com");
-  await page.getByRole("button", { name: "Continue" }).click();
-  await expect(page).toHaveURL(/\/verify-otp$/);
-  const digits = page.getByRole("group", { name: "6-digit verification code" });
-  for (const [index, digit] of Array.from("654321").entries()) {
-    await digits.getByRole("textbox", { name: `Verification code digit ${index + 1}` }).fill(digit);
+test("old per-portal and sign-up routes lead to the single sign-in", async ({ page }) => {
+  await mockBackend(page);
+  for (const route of ["/dealer/login", "/super-admin/login", "/register", "/verify-otp"]) {
+    await page.goto(route);
+    await expect(page).toHaveURL(/\/login$/);
   }
-  await page.getByRole("button", { name: "Verify code" }).click();
-  await expect(page).toHaveURL(/\/reset-password$/);
+  await page.goto("/reset-password");
+  await expect(page).toHaveURL(/\/forgot-password$/);
+});
 
-  await page.getByRole("textbox", { name: "New password", exact: true }).fill(
-    "NewSecurePass123"
-  );
-  await page
-    .getByRole("textbox", { name: "Confirm new password", exact: true })
-    .fill("NewSecurePass123");
-  await page.getByRole("button", { name: "Reset password & sign in" }).click();
-  await expect(page.getByRole("heading", { name: "Password updated" })).toBeVisible();
+test("signs in, shows role and territory, and signs out", async ({ page }) => {
+  const calls = await mockBackend(page);
+  await page.goto("/login");
+  await signIn(page);
+
+  await expect(page).toHaveURL(/\/account$/);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Dealer Hub");
+  await expect(page.getByText("Order at dealer price").first()).toBeVisible();
+  await expect(page.getByText("Create users, edit them, disable them, and reset their passwords")).toBeVisible();
+  await expect(page.getByText("Bihar › Purbi Champaran")).toBeVisible();
+
+  // The session survives a reload through the refresh cookie.
+  await page.reload();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Dealer Hub");
+  expect(calls).toContain("POST /auth/refresh");
+
+  await page.getByRole("button", { name: "Sign out" }).click();
+  await expect(page).toHaveURL(/\/login/);
+  expect(calls).toContain("POST /auth/logout");
+});
+
+test("shows backend errors, including a lockout countdown", async ({ page }) => {
+  await mockBackend(page, { loginError: { status: 401, code: "INVALID_CREDENTIALS" } });
+  await page.goto("/login");
+  await signIn(page, "wrong-password");
+  await expect(page.getByRole("alert").filter({ hasText: "don't match" })).toBeVisible();
+
+  await page.unrouteAll();
+  await mockBackend(page, {
+    loginError: { status: 429, code: "TOO_MANY_ATTEMPTS", headers: { "Retry-After": "900" } },
+  });
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+  await expect(page.getByRole("alert").filter({ hasText: /Try again in 1[45]:\d\d/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Sign in", exact: true })).toBeDisabled();
+});
+
+test("a temporary password must be changed before anything else", async ({ page }) => {
+  await mockBackend(page, { mustChangePassword: true });
+  await page.goto("/login");
+  await signIn(page, "Temporary123");
+
+  await expect(page).toHaveURL(/\/change-password$/);
+  await expect(page.getByText("Your admin set a temporary password.")).toBeVisible();
+
+  // The account page sends them back until it's done.
+  await page.goto("/account");
+  await expect(page).toHaveURL(/\/change-password$/);
+
+  await page.getByLabel("Temporary password").fill("Temporary123");
+  await page.getByLabel("New password", { exact: true }).fill("MyOwnPassword9");
+  await page.getByLabel("Confirm new password").fill("MyOwnPassword9");
+  await page.getByRole("button", { name: "Change password" }).click();
+
+  await expect(page).toHaveURL(/\/account\?passwordChanged=1$/);
+  await expect(page.getByText("Password changed.")).toBeVisible();
+});
+
+test("a wrong current password is reported on its field", async ({ page }) => {
+  await mockBackend(page, { mustChangePassword: true, passwordError: { status: 400, code: "WRONG_PASSWORD" } });
+  await page.goto("/login");
+  await signIn(page, "Temporary123");
+  await expect(page).toHaveURL(/\/change-password$/);
+
+  await page.getByLabel("Temporary password").fill("not-it");
+  await page.getByLabel("New password", { exact: true }).fill("MyOwnPassword9");
+  await page.getByLabel("Confirm new password").fill("MyOwnPassword9");
+  await page.getByRole("button", { name: "Change password" }).click();
+  await expect(page.locator("#current-password-error")).toHaveText("Your current password is wrong.");
+});
+
+test("signed-out visitors to the account page are sent to sign in", async ({ page }) => {
+  await mockBackend(page);
+  await page.goto("/account");
+  await expect(page).toHaveURL(/\/login\?next=%2Faccount$/);
 });

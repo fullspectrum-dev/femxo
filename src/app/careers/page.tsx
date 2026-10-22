@@ -1,40 +1,32 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  ArrowRight,
-  Boxes,
-  Code2,
-  HeartHandshake,
-  MapPin,
-} from "lucide-react";
+import { ArrowRight, Boxes, Code2, HeartHandshake, MapPin, Phone } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Container } from "@/components/shared/Container";
+import { SectionHeading } from "@/components/shared/SectionHeading";
+import { CONTACT } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Careers",
-  description:
-    "Explore career opportunities at FEMXO and help build tools for India's distribution networks.",
+  description: "Help Femxo bring Bihar's local businesses online - careers in technology, distribution and support.",
 };
 
 const TEAMS = [
   {
     icon: Code2,
-    title: "Product & engineering",
-    description:
-      "Build reliable software for inventory, orders, payments, and business operations.",
+    title: "Femxo Tech",
+    description: "Build the ERP, apps and AI tools that dealers and shop owners use every day.",
   },
   {
     icon: Boxes,
-    title: "Distribution & operations",
-    description:
-      "Help connect dealers, sub-dealers, retail partners, and customers through better workflows.",
+    title: "Distribution and operations",
+    description: "Grow the dealer and sub-dealer network, district by district.",
   },
   {
     icon: HeartHandshake,
-    title: "Customer success",
-    description:
-      "Support businesses as they bring their day-to-day operations onto FEMXO ERP.",
+    title: "Onboarding and support",
+    description: "Help entrepreneurs - especially women in towns and villages - get started with digital tools.",
   },
 ];
 
@@ -43,96 +35,65 @@ export default function CareersPage() {
     <>
       <Header />
       <main className="flex-1">
-        <section className="relative overflow-hidden bg-gradient-hero pb-16 pt-32 sm:pb-20 sm:pt-36 lg:pb-24 lg:pt-44">
-          <div
-            aria-hidden="true"
-            className="absolute -right-24 -top-24 size-80 rounded-full bg-white/10 blur-3xl"
-          />
+        <section className="ink band-ink relative overflow-hidden pb-16 pt-32 sm:pb-20 sm:pt-36 lg:pt-40">
+          <div aria-hidden="true" className="dot-grid absolute inset-0 opacity-50" />
           <Container className="relative">
-            <Link
-              href="/"
-              className="text-sm font-medium text-brand-100 transition-colors hover:text-white"
-            >
-              Home <span aria-hidden="true">/</span> Careers
+            <p className="eyebrow">Careers at Femxo</p>
+            <h1 className="mt-4 max-w-3xl font-display text-4xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+              Help Bihar&rsquo;s local businesses <span className="text-gold">go digital.</span>
+            </h1>
+            <p className="mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+              We&rsquo;re a Raxaul-based team connecting commerce, distribution and technology across
+              Bihar&rsquo;s 38 districts.
+            </p>
+            <Link href="#open-roles" className="btn-gold mt-8">
+              View open roles <ArrowRight size={18} aria-hidden="true" />
             </Link>
-            <div className="mt-10 max-w-3xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-brand-200">
-                Careers at FEMXO
-              </p>
-              <h1 className="mt-4 font-display text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
-                Build tools that help businesses move forward.
-              </h1>
-              <p className="mt-6 max-w-2xl text-base leading-relaxed text-brand-100 sm:text-lg">
-                FEMXO ERP brings dealers, sub-dealers, retail partners, and
-                customers onto one platform. Explore the teams behind the
-                product and check this page for opportunities.
-              </p>
-              <Link
-                href="#open-roles"
-                className="mt-8 inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-semibold text-brand-700 shadow-lg transition-colors hover:bg-brand-50"
-              >
-                View open roles <ArrowRight size={18} aria-hidden="true" />
-              </Link>
-            </div>
           </Container>
         </section>
 
         <section className="section-padding">
           <Container>
-            <div className="max-w-2xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-brand-600">
-                Where you can make an impact
-              </p>
-              <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                Work on real business challenges
-              </h2>
-              <p className="mt-4 leading-relaxed text-muted-foreground">
-                From the software powering daily operations to the people
-                helping businesses adopt it, our work spans the full
-                distribution journey.
-              </p>
-            </div>
-
+            <SectionHeading
+              eyebrow="Where you can make an impact"
+              title="Work that reaches every village"
+              subtitle="From the software behind daily operations to the people who help businesses adopt it."
+            />
             <div className="mt-10 grid gap-5 md:grid-cols-3">
               {TEAMS.map(({ icon: Icon, title, description }) => (
-                <article
-                  key={title}
-                  className="rounded-2xl border border-border/70 bg-card p-6 shadow-sm"
-                >
-                  <div className="flex size-12 items-center justify-center rounded-xl bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">
-                    <Icon size={22} aria-hidden="true" />
-                  </div>
-                  <h3 className="mt-5 font-display text-lg font-semibold text-foreground">
-                    {title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    {description}
-                  </p>
+                <article key={title} className="card-raised rounded-3xl p-6">
+                  <span className="icon-tile">
+                    <Icon size={18} aria-hidden="true" />
+                  </span>
+                  <h3 className="mt-5 font-display text-lg font-bold text-foreground">{title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{description}</p>
                 </article>
               ))}
             </div>
           </Container>
         </section>
 
-        <section id="open-roles" className="section-padding bg-muted/40">
+        <section id="open-roles" className="section-padding scroll-mt-16 pt-0 sm:pt-0 lg:pt-0">
           <Container size="narrow">
-            <div className="rounded-3xl border border-border/70 bg-card p-7 text-center shadow-sm sm:p-10">
-              <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">
-                <MapPin size={22} aria-hidden="true" />
-              </div>
+            <div className="card-raised rounded-3xl p-7 text-center sm:p-10">
+              <span className="icon-tile-gold mx-auto">
+                <MapPin size={18} aria-hidden="true" />
+              </span>
               <h2 className="mt-5 font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                 Open positions
               </h2>
               <p className="mx-auto mt-3 max-w-xl leading-relaxed text-muted-foreground">
-                There are no open roles listed right now. Please check back for
-                future opportunities.
+                No roles are listed right now. If you&rsquo;d like to work with us, call and tell us about
+                yourself.
               </p>
-              <Link
-                href="/#features"
-                className="mt-6 inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
-              >
-                Explore FEMXO ERP <ArrowRight size={16} aria-hidden="true" />
-              </Link>
+              <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+                <a href={CONTACT.phoneHref} className="btn-gold">
+                  <Phone size={16} aria-hidden="true" /> Call {CONTACT.phone}
+                </a>
+                <Link href="/#why" className="btn-outline">
+                  About Femxo <ArrowRight size={16} aria-hidden="true" />
+                </Link>
+              </div>
             </div>
           </Container>
         </section>

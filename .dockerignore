@@ -1,0 +1,14 @@
+node_modules
+.next*
+out
+coverage
+test-results
+playwright-report
+blob-report
+tsconfig.tsbuildinfo
+.env*
+!.env.example
+*.log
+.git
+Dockerfile
+.dockerignore

@@ -1,33 +1,21 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, KeyRound } from "lucide-react";
 import { useState } from "react";
 import type { ComponentProps, ReactNode } from "react";
 import type { UseFormRegisterReturn } from "react-hook-form";
 import { AuthField } from "./AuthField";
 
-interface PasswordInputProps
-  extends Omit<ComponentProps<"input">, "id" | "name" | "type"> {
+interface PasswordInputProps extends Omit<ComponentProps<"input">, "id" | "name" | "type"> {
   id: string;
   label: string;
   registration?: UseFormRegisterReturn;
   error?: string;
-  hint?: string;
-  leading?: ReactNode;
+  hint?: ReactNode;
 }
 
-export function PasswordInput({
-  id,
-  label,
-  registration,
-  error,
-  hint,
-  leading,
-  ...inputProps
-}: PasswordInputProps) {
+export function PasswordInput({ id, label, registration, error, hint, placeholder, ...inputProps }: PasswordInputProps) {
   const [visible, setVisible] = useState(false);
-  const reduceMotion = useReducedMotion();
 
   return (
     <AuthField
@@ -37,32 +25,17 @@ export function PasswordInput({
       registration={registration}
       error={error}
       hint={hint}
-      leading={leading}
-      autoComplete={inputProps.autoComplete}
-      placeholder={inputProps.placeholder ?? "Enter your password"}
+      leading={<KeyRound size={17} />}
+      placeholder={placeholder ?? "Enter your password"}
       trailing={
         <button
           type="button"
-          className="auth-password-toggle"
+          className="-mr-1 flex size-9 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
           aria-label={visible ? "Hide password" : "Show password"}
           aria-pressed={visible}
           onClick={() => setVisible((current) => !current)}
         >
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.span
-              key={visible ? "visible" : "hidden"}
-              initial={reduceMotion ? false : { opacity: 0, scale: 0.85 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={reduceMotion ? undefined : { opacity: 0, scale: 0.85 }}
-              transition={{ duration: reduceMotion ? 0 : 0.12 }}
-            >
-              {visible ? (
-                <EyeOff size={18} aria-hidden="true" />
-              ) : (
-                <Eye size={18} aria-hidden="true" />
-              )}
-            </motion.span>
-          </AnimatePresence>
+          {visible ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
         </button>
       }
       {...inputProps}

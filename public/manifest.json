@@ -1,11 +1,11 @@
 {
-  "name": "FEMXO ERP",
+  "name": "Femxo",
   "short_name": "FEMXO",
-  "description": "India ka Naya Business ERP Platform",
+  "description": "Digitising Bihar's local businesses",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#45216F",
-  "theme_color": "#6C35A5",
+  "background_color": "#130A1F",
+  "theme_color": "#84288C",
   "icons": [
     {
       "src": "/icons/icon-192.png",

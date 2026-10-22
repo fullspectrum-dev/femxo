@@ -1,22 +1,25 @@
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { Container } from "@/components/shared/Container";
+import { Logo } from "@/components/shared/Logo";
 
 export default function NotFound() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background py-16">
-      <Container className="text-center">
-        <p className="font-display text-sm font-semibold text-brand-600">404</p>
-        <h1 className="mt-3 font-display text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-          Page not found
-        </h1>
-        <p className="mt-4 text-base text-muted-foreground">
-          The page you are looking for does not exist or has moved.
+    <main className="ink band-ink relative flex min-h-svh items-center overflow-hidden py-16">
+      <div aria-hidden="true" className="dot-grid absolute inset-0 opacity-50" />
+      <Container className="relative text-center">
+        <Logo className="justify-center" />
+        <p className="mt-12 font-display text-[clamp(5rem,20vw,9rem)] font-bold leading-none text-gold [text-shadow:0_6px_0_rgba(90,30,140,0.55)]">
+          404
         </p>
-        <Link
-          href="/"
-          className="mt-8 inline-flex rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-        >
-          Back to home
+        <h1 className="mt-4 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+          This page isn&rsquo;t on the map
+        </h1>
+        <p className="mx-auto mt-4 max-w-md text-base text-muted-foreground">
+          The page you&rsquo;re looking for doesn&rsquo;t exist or has moved.
+        </p>
+        <Link href="/" className="btn-gold mt-8">
+          <ArrowLeft size={17} aria-hidden="true" /> Back to Femxo
         </Link>
       </Container>
     </main>

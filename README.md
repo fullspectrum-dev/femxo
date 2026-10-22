@@ -1,15 +1,14 @@
-# FEMXO ERP web app
+# Femxo web app
 
-Next.js App Router landing pages and responsive FEMXO account-access screens.
-This is the standalone FEMXO Next.js frontend. The NestJS API and worker are
-separate applications.
+The Femxo website and account screens: a Next.js App Router frontend for
+[femxo-backend](../femxo-backend). The landing page explains the network; signed-in
+users get a role-based workspace page (announced as coming soon) built from
+what the backend says about their role and territory.
 
 ## Requirements and local setup
 
 - Node.js 24.15 or later.
-- pnpm 11 (the workspace pins the package manager).
-
-Run these commands from this project directory:
+- pnpm 11.20 (pinned for the Docker image too).
 
 ```powershell
 pnpm install
@@ -17,180 +16,117 @@ Copy-Item .env.example .env.local
 pnpm dev
 ```
 
-Open `http://localhost:3001`. The API can run separately on its own port.
-The auth routes are:
+Open `http://localhost:3001`. Development runs in **demo mode** by default: sign-in
+runs in the browser with test accounts, so no backend is needed. To use the real
+API, start femxo-backend on port 3000 and set `NEXT_PUBLIC_AUTH_DEMO_MODE=false`.
+Restart `pnpm dev` after changing `next.config.ts` or `.env.local`.
 
-- `/register`
-- `/login`
-- `/verify-otp`
-- `/forgot-password`
-- `/reset-password`
-- `/{portal}/coming-soon` after a successful sign-in (role-specific)
+## Routes
 
-Successful password and OTP sign-ins show the account type on its dedicated
-full-viewport coming-soon page, separate from the authentication layout. That
-page is guarded by the in-memory sign-in result and
-returns to the matching role login if opened directly or without a completed
-sign-in in the current tab.
+| Route | What it is |
+|---|---|
+| `/` | Landing page |
+| `/careers` | Careers |
+| `/login` | One sign-in for every role (email and password) |
+| `/change-password` | Required after an admin sets a temporary password; also voluntary |
+| `/forgot-password` | Explains that admins reset passwords (the backend has no self-service reset) |
+| `/account` | The signed-in user's workspace for their role, plus their current access |
 
-Development defaults to a clearly labeled, in-memory demo flow so registration
-and portal screens can be tried without a server. Demo data is temporary and
-never creates a real account, sends an OTP, or establishes a secure session.
-
-## Build and production start
-
-From this project directory:
-
-```powershell
-pnpm build
-pnpm start
-```
-
-Deploy this project as a Node.js web service. Run `pnpm install` before
-building, provide only public configuration at build time, and set server-only
-secrets in the deployment platform's secret manager. Do not expose the NestJS
-API's private credentials to this client-side app.
+Old URLs (`/register`, `/verify-otp`, `/reset-password`, `/{portal}/login` and so
+on) redirect to these.
 
 ## Configuration
 
-`NEXT_PUBLIC_AUTH_API_BASE_URL` is a public API origin/path, not a secret. It
-defaults to `/api/auth`, which expects a same-origin backend or reverse proxy.
-For a separate API, set it to an HTTPS origin and configure CORS to allow the
-exact web origin and credentials. Never put API keys, private URLs, passwords,
-or signing secrets in `NEXT_PUBLIC_*` variables.
-`NEXT_PUBLIC_AUTH_DEMO_MODE=false` disables the demo and exercises the real API
-client. Production builds disable demo auth unless
-`NEXT_PUBLIC_AUTH_DEMO_MODE=true` is explicitly set at build time. Use that
-setting only for a public test deployment: the prefilled credentials and demo
-OTP are visible to every visitor, and anybody can enter the demo portals. Demo
-mode does not authenticate real accounts and must not be used for actual
-customer, dealer, or administrator access. Remove the setting and redeploy to
-disable the production demo.
+| Variable | When | Purpose |
+|---|---|---|
+| `FEMXO_API_ORIGIN` | build | Where femxo-backend runs. The site forwards `/auth`, `/access` and `/territories` to it. Default `http://localhost:3000`. |
+| `NEXT_PUBLIC_API_BASE_URL` | build | Optional. Call the API origin directly instead of through the forwarding. |
+| `NEXT_PUBLIC_AUTH_DEMO_MODE` | build | `true` for in-browser demo sign-in. On in development, off in production builds unless set to `true`. |
 
-For a live test deployment, add `NEXT_PUBLIC_AUTH_DEMO_MODE=true` to the
-hosting provider's build environment for the Production or Preview target, then
-redeploy. This is a public client-side setting, not a secret. Do not enable it
-on a site that is being used for real account access.
+All three are read at build time: rewrites and `NEXT_PUBLIC_*` values are baked
+into the build. None of them is a secret; never put secrets in `NEXT_PUBLIC_*`.
 
-Copy `.env.example` to `.env.local` for local work. Production secrets belong
-only in the backend's secret manager.
+**Why the forwarding.** The backend's refresh token cookie is `Path=/auth`,
+`SameSite=Strict`, `Secure`, `httpOnly`. Serving `/auth` from this site's origin
+keeps it first-party with no CORS setup. If you use `NEXT_PUBLIC_API_BASE_URL`
+instead, the API must be on the same site (e.g. `api.femxo.com` for `femxo.com`)
+and list this site in its `CORS_ORIGINS`.
 
-## Authentication API contract
+**Rate limits behind the forwarding.** The backend limits login attempts per
+client IP. Through the forwarding, requests reach it from this server, so set the
+backend's `TRUST_PROXY_HOPS` to count every proxy in front of it (load balancer
+*and* this server), or every user shares one limit.
 
-Requests are JSON `POST`s with `credentials: "include"`, `cache: "no-store"`,
-a 12-second client timeout, and no automatic retry. The server must validate
-every field again. Error response bodies are deliberately not surfaced to the
-user; the UI maps HTTP statuses to safe, generic messages.
+## Backend contract
 
-| Endpoint | Request | Success response |
-| --- | --- | --- |
-| `POST /register` | `{ fullName, mobile, email, password, accountType, termsAccepted: true }` | `{ challengeId, expiresInSeconds, resendAfterSeconds, maskedDestination }` |
-| `POST /login/otp` | `{ mobile, accountType }` | Challenge response above |
-| `POST /login/password` | `{ email, password, accountType }` | `{ authenticated: true }` and a server-set session cookie |
-| `POST /otp/verify` | `{ challengeId, code, purpose, accountType }` | `{ verified: true, resetGrant? }` |
-| `POST /otp/resend` | `{ challengeId, purpose, accountType }` | A fresh challenge response |
-| `POST /password/recovery` | `{ identifier, accountType }` | Challenge response above, with an enumeration-safe response policy |
-| `POST /password/reset` | `{ resetGrant, password }` | `{ updated: true }` |
+The client ([auth-client.ts](src/features/auth/services/auth-client.ts)) uses:
 
-When demo mode is disabled, the API base URL includes `/api/auth`; append the
-paths in the table to that base. `purpose` is `login`, `registration`, or `password_reset`. Login, OTP
-verification/resend, and password-recovery requests include an `accountType`
-matching the selected portal (`dealer`, `sub_dealer`, `retail_partner`,
-`customer`, or `super_admin`). Public registration accepts
-only `dealer`, `sub_dealer`, `retail_partner`, or `customer`; the server must
-reject `super_admin` registration regardless of the client UI.
+| Endpoint | Use |
+|---|---|
+| `POST /auth/login` | `{ email, password }` → `{ accessToken, expiresIn, user }` and the refresh cookie |
+| `POST /auth/refresh` | Cookie → new `{ accessToken, expiresIn }`; the cookie rotates |
+| `POST /auth/logout` | Ends the session |
+| `GET /auth/me` | The user, including `mustChangePassword` |
+| `POST /auth/password` | `{ currentPassword, newPassword }`; signs out other sessions |
+| `GET /access/me` | `{ isSuperAdmin, permissions, roles, territoryIds, locationIds }` |
+| `GET /territories/:id` | A location and its ancestors, for breadcrumbs |
 
-`/login` and `/register` are portal selectors. Each role then uses a separate
-route (`/customer/login`, `/dealer/login`, `/sub-dealer/login`,
-`/retail-partner/login`, or `/super-admin/login`) and receives a role-scoped
-API request. The backend must validate that the authenticated account actually
-belongs to the requested account type; this client-supplied context is not an
-authorization grant.
+Errors are `{ error: { code, message } }`; the client maps each code
+(`INVALID_CREDENTIALS`, `TOO_MANY_ATTEMPTS` with `Retry-After`, `WRONG_PASSWORD`,
+…) to a friendly message. The access token lives only in memory. Refreshes are
+single-flight and serialised across tabs with a Web Lock, because the backend
+revokes the whole session when a rotated refresh token is reused.
 
-The server must:
+The workspace page picks a role from `roles` by name ([roles.ts](src/lib/roles.ts));
+a role with an unrecognised name gets a generic workspace.
 
-- Set session cookies as `HttpOnly; Secure` in production with an appropriate
-  `SameSite` policy, rotate them when required, and never return session tokens
-  to browser JavaScript.
-- Provision Super Admin accounts only through a trusted administrative
-  process or authorized invitation. Public registration must reject that role.
-- Generate opaque, unpredictable, single-purpose OTP challenge IDs; expire
-  challenges, limit attempts, enforce resend cooldowns and rate limits on the
-  server, and invalidate superseded/consumed challenges.
-- Return the same status/body/shape and comparable timing from password
-  recovery whether or not an account exists. A successful recovery request
-  must provide a non-enumerating challenge response, including the same
-  generic `maskedDestination` string (never a contact-specific mask); deliver
-  a code only when appropriate. Centralize abuse limits across backend
-  replicas.
-- Return a short-lived, single-use reset grant only after a valid recovery OTP.
-  Bind it to the account and reset purpose, end other active sessions after a
-  successful password change, and do not use the grant as a login session.
-- Validate allowed origins and apply CSRF protections for cookie-authenticated
-  mutations. Use HTTPS, secure headers, audit privileged account changes, and
-  avoid logging passwords, OTPs, reset grants, session cookies, or raw
-  identifiers.
-- Record accepted terms/version and timestamps on the server; `termsAccepted`
-  from the browser is not proof of consent by itself.
+## Demo accounts
 
-The OTP challenge and reset grant are held only in the auth route group's
-in-memory React provider. They are intentionally not written to localStorage,
-sessionStorage, cookies, URLs, or logs. Reloading or opening a new tab discards
-an in-progress flow; the user can request a new code.
-
-## Structure
-
-```text
-src/app/(auth)/                 Auth route group and shared flow provider
-src/app/(auth)/{route}/         Five independent App Router pages
-src/features/auth/components/   Shared auth frame, inputs, and each form
-src/features/auth/schemas/      Zod client-side validation
-src/features/auth/services/     Typed backend client and privacy-safe event hook
-src/features/auth/types/        Account, challenge, and API types
-src/features/auth/utils/        Password-strength presentation helper
-tests/                           Vitest/Testing Library and Playwright specs
-```
+With demo mode on, `/login` offers one account per role (Super Admin, Admin,
+Warehouse, Dealer, Field staff, Sub-dealer, Customer) and a "First sign-in"
+account that must change its password. The demo
+([demo-backend.ts](src/features/auth/services/demo-backend.ts)) answers with the
+backend's shapes and error codes. Its passwords are public and grant nothing.
+Production builds replace it with a stub unless demo mode is explicitly on, so
+the demo accounts never ship by accident.
 
 ## Quality checks
 
 ```powershell
 pnpm lint
 pnpm typecheck
-pnpm test
+pnpm test                         # unit tests (Vitest)
 pnpm exec playwright install chromium
-pnpm test:e2e
-pnpm test:e2e:demo
+pnpm test:e2e                     # mocked backend, demo off (port 3011)
+pnpm test:e2e:demo                # demo mode (port 3012)
+pnpm test:e2e:demo:production     # demo mode on a production build
 pnpm build
 ```
 
-The regular Playwright flow tests disable demo mode and stub API responses to
-verify the real API client interaction and route transitions. The separate
-`test:e2e:demo` suite exercises the local-only demo implementation. Neither
-suite validates the security or availability of a real authentication service.
-Lighthouse/Core Web Vitals and load testing have not been run. A million
-registered accounts is not a measured concurrency or capacity result.
+## Deployment
 
-## Deployment and scaling notes
+`pnpm build` produces a self-contained server in `.next/standalone`
+(`output: "standalone"`). With Docker:
 
-Deploy the frontend behind HTTPS and a CDN for static assets. Route API calls to
-a backend with horizontally scalable application instances, shared durable
-identity/session storage, and centralized OTP/login rate limiting. Define
-explicit timeout and availability SLOs, privacy-safe error monitoring, alerting,
-and tested recovery/runbook procedures before production rollout. Do not add
-client-side caching or retry authentication mutations without an idempotency
-contract. Capacity claims require workload-specific load tests and monitoring;
-this UI implementation does not establish backend scale.
+```powershell
+docker build -t femxo-frontend --build-arg FEMXO_API_ORIGIN=http://api:3000 .
+docker run -p 3001:3001 femxo-frontend
+```
 
-The four demo accounts (Customer, Dealer, Sub-dealer, Super Admin) are
-pre-filled on their respective sign-in pages when demo mode is enabled. Demo
-password sign-in, OTP `123456`, registration, and recovery are handled by a
-browser-memory-only mock. These visible sample credentials are intentionally
-not secrets and must never be reused in a real environment. Super Admin demo
-access is a visual preview only and grants no real privileges.
-Retail Partner accounts can be created in the demo flow but do not have a
-pre-seeded credential.
+Without Docker, copy the assets next to the server and run it:
 
-`reportAuthFailure` emits a `femxo:auth-failure` browser event containing only
-the endpoint path, HTTP status (when available), and failure category. A
-deployment may bridge this event to its approved monitoring service after
-reviewing its privacy policy. No personal form value is included.
+```powershell
+pnpm build
+Copy-Item -Recurse public .next/standalone/
+Copy-Item -Recurse .next/static .next/standalone/.next/
+$env:PORT = 3001; node .next/standalone/server.js
+```
+
+Serve it over HTTPS (the refresh cookie is `Secure`). Every response carries
+`X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`,
+`Permissions-Policy` and `Strict-Transport-Security`. There is no
+Content-Security-Policy yet: the theme script in `app/layout.tsx` is inline and
+needs a nonce first.
+
+`reportAuthFailure` emits a `femxo:auth-failure` browser event with only the
+endpoint, status and failure kind (no form values), for wiring to monitoring.

@@ -1,9 +1,10 @@
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 interface SectionHeadingProps {
   eyebrow?: string;
-  title: string;
-  subtitle?: string;
+  title: ReactNode;
+  subtitle?: ReactNode;
   align?: "left" | "center";
   className?: string;
 }
@@ -12,7 +13,7 @@ export function SectionHeading({
   eyebrow,
   title,
   subtitle,
-  align = "center",
+  align = "left",
   className,
 }: SectionHeadingProps) {
   return (
@@ -23,12 +24,8 @@ export function SectionHeading({
         className
       )}
     >
-      {eyebrow && (
-        <span className="mb-3 inline-block rounded-full border border-brand-300/40 bg-brand-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-brand-700 dark:border-brand-700/40 dark:bg-brand-900/40 dark:text-brand-300">
-          {eyebrow}
-        </span>
-      )}
-      <h2 className="font-display text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+      {eyebrow && <p className="eyebrow mb-3">{eyebrow}</p>}
+      <h2 className="font-display text-3xl font-bold leading-[1.08] tracking-tight text-foreground sm:text-4xl lg:text-5xl">
         {title}
       </h2>
       {subtitle && (

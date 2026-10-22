@@ -40,7 +40,9 @@
     ".next-demo/types/**/*.ts",
     ".next-demo/dev/types/**/*.ts",
     ".next-demo-production/types/**/*.ts",
-    ".next-demo-production/dev/types/**/*.ts"
+    ".next-demo-production/dev/types/**/*.ts",
+    ".next-shots/types/**/*.ts",
+    ".next-shots/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

@@ -7,7 +7,7 @@ export default defineConfig({
   workers: 1,
   reporter: "list",
   use: {
-    baseURL: "http://127.0.0.1:3002",
+    baseURL: "http://127.0.0.1:3012",
     trace: "retain-on-failure",
   },
   projects: [
@@ -17,8 +17,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm exec next dev --hostname 127.0.0.1 --port 3002",
-    url: "http://127.0.0.1:3002",
+    command: "pnpm exec next dev --hostname 127.0.0.1 --port 3012",
+    url: "http://127.0.0.1:3012",
+    // Its own port, so a `pnpm dev` on 3001 (demo mode, other env) is never reused.
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
     env: {
