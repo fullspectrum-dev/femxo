@@ -389,3 +389,59 @@
 .animate-orbit-counter {
   animation: orbit-spin 38s linear infinite reverse;
 }
+
+/*
+ * Entrepreneurs map: the board floats, gold dots twinkle, city rings ping and
+ * routes flow. The SVG's own SMIL motion (sweep, ripples, packets) sits in
+ * .map-motion and is hidden for reduced motion, since the global rule only
+ * stops CSS animation.
+ */
+.map-float {
+  animation: map-float 9s ease-in-out infinite;
+}
+
+.map-twinkle {
+  animation: map-twinkle 3s ease-in-out infinite;
+}
+
+.map-ping {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ping-soft 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.map-route {
+  animation: map-route 1.6s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-motion {
+    display: none;
+  }
+}
+
+@keyframes map-float {
+  0%,
+  100% {
+    transform: rotate(-3deg) translateY(0);
+  }
+  50% {
+    transform: rotate(-2deg) translateY(-12px);
+  }
+}
+
+@keyframes map-twinkle {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes map-route {
+  to {
+    stroke-dashoffset: -14;
+  }
+}

@@ -3,6 +3,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/sections/Hero";
 import { WhyFemxo } from "@/components/sections/WhyFemxo";
 import { NetworkTree } from "@/components/sections/NetworkTree";
+import { Entrepreneurs } from "@/components/sections/Entrepreneurs";
 import { Platform } from "@/components/sections/Platform";
 import { FemxoTech } from "@/components/sections/FemxoTech";
 import { Women } from "@/components/sections/Women";
@@ -17,6 +18,7 @@ export default function HomePage() {
         <Hero />
         <WhyFemxo />
         <NetworkTree />
+        <Entrepreneurs />
         <Platform />
         <FemxoTech />
         <Women />

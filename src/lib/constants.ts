@@ -48,3 +48,15 @@ export const BIHAR_LEVELS = [
   { value: "8,000+", label: "Gram panchayats" },
   { value: "40,000+", label: "Villages" },
 ] as const;
+
+/**
+ * The entrepreneur model: one dealer per gram panchayat, two sub-dealers per
+ * village. Panchayats: 8,072 contested in the 2021 Bihar panchayat elections
+ * (CAG audit report, 2023). Villages: 44,874 in Census 2011.
+ */
+export const ENTREPRENEUR_MODEL = {
+  panchayats: 8072,
+  dealersPerPanchayat: 1,
+  villages: 44874,
+  subDealersPerVillage: 2,
+} as const;
