@@ -5,6 +5,13 @@ export interface NavLink {
   highlight?: boolean;
 }
 
+/** The live site. Canonical URLs, the sitemap and structured data use it. */
+export const SITE = {
+  url: "https://www.femxo.in",
+  name: "Femxo Consultancy Services",
+  shortName: "Femxo",
+} as const;
+
 export const NAV_LINKS: readonly NavLink[] = [
   { label: "Why Femxo", href: "#why" },
   { label: "Network", href: "#network" },
@@ -51,12 +58,16 @@ export const BIHAR_LEVELS = [
 
 /**
  * The entrepreneur model: one dealer per gram panchayat, two sub-dealers per
- * village. Panchayats: 8,072 contested in the 2021 Bihar panchayat elections
- * (CAG audit report, 2023). Villages: 44,874 in Census 2011.
+ * village, one urban dealer per municipal ward. Panchayats: 8,072 contested
+ * in the 2021 Bihar panchayat elections (CAG audit report, 2023). Villages:
+ * 44,874 in Census 2011. Urban wards: 3,398 across Bihar's municipal
+ * corporations, nagar parishads and nagar panchayats (CAG, December 2019).
  */
 export const ENTREPRENEUR_MODEL = {
   panchayats: 8072,
   dealersPerPanchayat: 1,
   villages: 44874,
   subDealersPerVillage: 2,
+  urbanWards: 3398,
+  dealersPerWard: 1,
 } as const;

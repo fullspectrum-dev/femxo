@@ -3,4 +3,4 @@ Allow: /
 Disallow: /api/
 Disallow: /admin/
 
-Sitemap: https://femxo.com/sitemap.xml
+Sitemap: https://www.femxo.in/sitemap.xml

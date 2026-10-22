@@ -1,19 +1,22 @@
 import type { CSSProperties } from "react";
-import { Equal, Plus, Store, Users } from "lucide-react";
+import { Building2, Equal, Plus, Store, Users } from "lucide-react";
 import { Container } from "@/components/shared/Container";
 import { ENTREPRENEUR_MODEL } from "@/lib/constants";
 
 /*
  * How the network adds up to roughly one lakh local entrepreneurs: a dealer
- * in every gram panchayat and two sub-dealers in every village. Behind it,
+ * in every gram panchayat, two sub-dealers in every village and one urban
+ * dealer in every municipal ward. Behind it,
  * Bihar drawn as a floating board of dots: gold dots twinkle as partners,
  * a light sweeps across, and packets run from Patna out to the major cities.
  */
 
-const { panchayats, dealersPerPanchayat, villages, subDealersPerVillage } = ENTREPRENEUR_MODEL;
+const { panchayats, dealersPerPanchayat, villages, subDealersPerVillage, urbanWards, dealersPerWard } =
+  ENTREPRENEUR_MODEL;
 const DEALERS = panchayats * dealersPerPanchayat;
 const SUB_DEALERS = villages * subDealersPerVillage;
-const TOTAL = DEALERS + SUB_DEALERS;
+const URBAN_DEALERS = urbanWards * dealersPerWard;
+const TOTAL = DEALERS + SUB_DEALERS + URBAN_DEALERS;
 
 const fmt = (n: number) => n.toLocaleString("en-IN");
 
@@ -190,7 +193,7 @@ function MapBoard() {
         letterSpacing="2"
         fill="#de9beb"
       >
-        38 DISTRICTS · {fmt(panchayats)} PANCHAYATS · {fmt(villages)} VILLAGES
+        38 DISTRICTS · {fmt(panchayats)} PANCHAYATS · {fmt(villages)} VILLAGES · {fmt(urbanWards)} WARDS
       </text>
 
       {DOTS.filter((d) => !d.gold).map((d, i) => (
@@ -326,6 +329,14 @@ const TERMS = [
     result: SUB_DEALERS,
     role: "Village sub-dealers",
   },
+  {
+    icon: Building2,
+    unit: "Urban wards",
+    count: urbanWards,
+    rule: `× ${dealersPerWard} urban dealer each`,
+    result: URBAN_DEALERS,
+    role: "Urban dealers",
+  },
 ] as const;
 
 export function Entrepreneurs() {
@@ -353,11 +364,11 @@ export function Entrepreneurs() {
             id="entrepreneurs-heading"
             className="font-display text-3xl font-bold leading-[1.08] tracking-tight text-foreground sm:text-4xl lg:text-5xl"
           >
-            How Femxo builds <span className="text-gold">1 lakh</span> local entrepreneurs
+            How Femxo builds <span className="text-gold">1 lakh+</span> local entrepreneurs
           </h2>
           <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-            One dealer in every gram panchayat, two sub-dealers in every village. Each one runs a business of their
-            own on the Femxo platform.
+            One dealer in every gram panchayat, two sub-dealers in every village and one urban dealer in every
+            town ward. Each one runs a business of their own on the Femxo platform.
           </p>
 
           <ol className="mt-8 space-y-3">
@@ -393,13 +404,14 @@ export function Entrepreneurs() {
               <p className="font-display text-4xl font-bold text-gold sm:text-5xl">{fmt(TOTAL)}</p>
             </div>
             <p className="pb-1 text-right font-display text-lg font-semibold text-foreground">
-              ≈ 1,00,000
+              1 lakh+
             </p>
           </div>
 
           <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
             Panchayats: 8,072 in the 2021 Bihar panchayat elections (CAG audit report). Villages: 44,874 (Census
-            2011). A long-term target, built in phases through local partners and verified demand.
+            2011). Urban wards: 3,398 across municipal corporations, nagar parishads and nagar panchayats (CAG,
+            2019). A long-term target, built in phases through local partners and verified demand.
           </p>
         </div>
       </Container>

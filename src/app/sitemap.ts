@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
+import { SITE } from "@/lib/constants";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://femxo.com";
+  const base = SITE.url;
   const now = new Date();
 
   return [
