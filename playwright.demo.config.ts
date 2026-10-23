@@ -2,7 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./tests/e2e",
-  testMatch: "auth-demo.spec.ts",
+  testMatch: ["auth-demo.spec.ts", "admin-demo.spec.ts"],
   fullyParallel: false,
   workers: 1,
   reporter: "list",

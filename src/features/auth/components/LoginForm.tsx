@@ -29,7 +29,7 @@ export function LoginForm() {
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
   const [demoAccounts, setDemoAccounts] = useState<DemoAccount[]>([]);
   const waitSeconds = useCountdown(lockedUntil);
-  const next = safeNextPath(searchParams.get("next"));
+  const nextParam = searchParams.get("next");
 
   const form = useForm<LoginInput, unknown, LoginOutput>({
     resolver: zodResolver(loginSchema),
@@ -38,11 +38,16 @@ export function LoginForm() {
   });
   const selectedEmail = useWatch({ control: form.control, name: "email" });
 
-  // Someone already signed in doesn't need this page.
+  // Someone already signed in doesn't need this page. Without a `next`, the
+  // Super Admin goes to the admin panel; other roles to their workspace page.
+  // `next=/account` counts as no preference: it's the generic landing page
+  // RequireSession sends people back to, not a page they picked.
   useEffect(() => {
     if (status !== "signed-in" || !user) return;
-    router.replace(user.mustChangePassword ? "/change-password" : next);
-  }, [status, user, next, router]);
+    const home = user.isSuperAdmin ? "/admin/dashboard" : "/account";
+    const requested = nextParam === "/account" ? null : nextParam;
+    router.replace(user.mustChangePassword ? "/change-password" : safeNextPath(requested, home));
+  }, [status, user, nextParam, router]);
 
   useEffect(() => {
     if (!isAuthDemoMode) return;

@@ -391,6 +391,114 @@
 }
 
 /*
+ * Hero orbit: each piece moves on its own rhythm so the visual never syncs up.
+ * The core breathes, the outer ring glows, service icons bob and every stat
+ * card floats along a different path and timing.
+ */
+.hero-core-pulse {
+  animation: hero-core-pulse 5s ease-in-out infinite;
+}
+
+.hero-ring-breathe {
+  animation: hero-ring-breathe 7s ease-in-out infinite;
+}
+
+.hero-icon-bob {
+  animation: hero-icon-bob 2.8s ease-in-out infinite;
+}
+
+.hero-float-a {
+  animation: hero-float-a 6s ease-in-out infinite;
+}
+
+.hero-float-b {
+  animation: hero-float-b 7.5s ease-in-out infinite 0.8s;
+}
+
+.hero-float-c {
+  animation: hero-float-c 8.5s ease-in-out infinite 1.6s;
+}
+
+.hero-float-d {
+  animation: hero-float-d 6.8s ease-in-out infinite 0.4s;
+}
+
+@keyframes hero-core-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 60px 6px rgba(164, 83, 194, 0.3);
+  }
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 0 100px 18px rgba(164, 83, 194, 0.5);
+  }
+}
+
+@keyframes hero-ring-breathe {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes hero-icon-bob {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.18);
+  }
+}
+
+@keyframes hero-float-a {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes hero-float-b {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(8px, -6px);
+  }
+}
+
+@keyframes hero-float-c {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  33% {
+    transform: translateY(6px) rotate(-1.5deg);
+  }
+  66% {
+    transform: translateY(-6px) rotate(1deg);
+  }
+}
+
+@keyframes hero-float-d {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-8px) translateY(-4px);
+  }
+}
+
+/*
  * Entrepreneurs map: the board floats, gold dots twinkle, city rings ping and
  * routes flow. The SVG's own SMIL motion (sweep, ripples, packets) sits in
  * .map-motion and is hidden for reduced motion, since the global rule only

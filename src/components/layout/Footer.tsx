@@ -54,7 +54,7 @@ export function Footer() {
             </Suspense>{" "}
             Femxo Consultancy Services Private Limited
           </p>
-          <p>Made in Bihar · Startup Bihar</p>
+          <p>Made in India · Startup India</p>
         </div>
       </Container>
     </footer>

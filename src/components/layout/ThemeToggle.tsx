@@ -49,19 +49,21 @@ function getServerThemeSnapshot() {
   return false;
 }
 
-export function ThemeToggle() {
-  const isDark = useSyncExternalStore(
-    subscribeToTheme,
-    getThemeSnapshot,
-    getServerThemeSnapshot
-  );
+/** Whether dark mode is on; follows the toggle, other tabs and the OS setting. */
+export function useIsDarkTheme() {
+  return useSyncExternalStore(subscribeToTheme, getThemeSnapshot, getServerThemeSnapshot);
+}
 
-  function toggleTheme() {
-    const nextIsDark = !document.documentElement.classList.contains("dark");
-    applyTheme(nextIsDark);
-    window.localStorage.setItem(THEME_STORAGE_KEY, nextIsDark ? "dark" : "light");
-    window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
-  }
+/** Flips light/dark and remembers the choice (shared by the site and the admin panel). */
+export function toggleTheme() {
+  const nextIsDark = !document.documentElement.classList.contains("dark");
+  applyTheme(nextIsDark);
+  window.localStorage.setItem(THEME_STORAGE_KEY, nextIsDark ? "dark" : "light");
+  window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
+}
+
+export function ThemeToggle() {
+  const isDark = useIsDarkTheme();
 
   return (
     <button

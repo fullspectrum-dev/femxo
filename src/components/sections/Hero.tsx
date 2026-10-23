@@ -10,18 +10,21 @@ const HERO_STATS = [
     label: "Businesses targeted",
     tone: "text-gold",
     position: "right-0 top-2 sm:right-2",
+    motion: "hero-float-a",
   },
   {
     value: "38",
     label: "Districts of Bihar",
     tone: "text-foreground",
     position: "left-0 top-[38%] -rotate-2",
+    motion: "hero-float-b",
   },
   {
     value: "AI + ERP",
     label: "Digital backbone",
     tone: "text-highlight",
     position: "right-0 top-[52%] rotate-1 sm:top-auto sm:bottom-2 sm:right-8",
+    motion: "hero-float-c",
   },
 ] as const;
 
@@ -75,7 +78,7 @@ export function Hero() {
           <div className="relative mx-auto aspect-square w-full max-w-[30rem]">
             <div className="absolute inset-0" aria-hidden="true">
               {/* Rings stay still; only the carriers inside them turn. */}
-              <div className="orbit absolute inset-[6%]" />
+              <div className="orbit hero-ring-breathe absolute inset-[6%]" />
               <div className="orbit-carrier animate-orbit-reverse inset-[6%]">
                 <span className="absolute left-1/2 top-0 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gold-400 shadow-[0_0_16px_4px_rgba(255,198,92,0.5)]" />
               </div>
@@ -92,50 +95,57 @@ export function Hero() {
                       top: `${50 + 50 * Math.sin((angle * Math.PI) / 180)}%`,
                     }}
                   >
-                    <span className="animate-orbit-counter flex size-9 items-center justify-center rounded-xl border border-white/15 bg-brand-800/90 text-gold-300 shadow-lg sm:size-10">
-                      <Icon size={17} />
+                    <span className="animate-orbit-counter flex size-8 items-center justify-center rounded-lg border border-white/15 bg-brand-800/90 text-gold-300 shadow-lg sm:size-9">
+                      <span className="hero-icon-bob flex">
+                        <Icon size={15} />
+                      </span>
                     </span>
                   </span>
                 ))}
               </div>
 
-              <div className="absolute inset-[36%] flex items-center justify-center rounded-full border border-white/15 bg-gradient-to-b from-brand-600/70 to-brand-900/80 shadow-[0_0_80px_10px_rgba(164,83,194,0.35)]">
+              <div className="hero-core-pulse absolute inset-[36%] flex flex-col items-center justify-center gap-1.5 rounded-full border border-white/15 bg-gradient-to-b from-brand-600/70 to-brand-900/80">
                 <Image
                   src="/images/femxo-mark-white.png"
                   alt=""
                   width={390}
                   height={570}
                   priority
-                  className="h-[46%] w-auto"
+                  className="h-[38%] w-auto"
                 />
+                <span className="text-center font-display text-[0.55rem] font-semibold uppercase leading-tight tracking-[0.18em] text-gold-300 sm:text-[0.65rem]">
+                  Femxo
+                  <br />
+                  Ecosystem
+                </span>
               </div>
 
+              {/* Outer wrapper holds position and tilt; the card inside floats. */}
               {HERO_STATS.map((stat) => (
-                <div
-                  key={stat.label}
-                  className={`card-glass absolute rounded-2xl px-5 py-4 backdrop-blur-md sm:px-6 sm:py-5 ${stat.position}`}
-                >
-                  <p className={`font-display text-3xl font-bold tracking-tight sm:text-4xl ${stat.tone}`}>
-                    {stat.value}
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground sm:text-sm">{stat.label}</p>
+                <div key={stat.label} className={`absolute ${stat.position}`}>
+                  <div className={`card-glass rounded-xl px-3.5 py-2.5 backdrop-blur-md sm:px-4 sm:py-3 ${stat.motion}`}>
+                    <p className={`font-display text-xl font-bold tracking-tight sm:text-2xl ${stat.tone}`}>
+                      {stat.value}
+                    </p>
+                    <p className="mt-0.5 text-[0.7rem] text-muted-foreground sm:text-xs">{stat.label}</p>
+                  </div>
                 </div>
               ))}
             </div>
 
             <Link
               href="#tech"
-              className="group absolute bottom-2 left-0 flex items-center gap-3 rounded-2xl border border-gold-400/50 bg-brand-900/80 px-4 py-3 shadow-[0_0_30px_-8px_rgba(255,198,92,0.6)] backdrop-blur-md transition-colors hover:border-gold-400 sm:left-2"
+              className="hero-float-d group absolute bottom-2 left-0 flex items-center gap-2.5 rounded-xl border border-gold-400/50 bg-brand-900/80 px-3 py-2 shadow-[0_0_30px_-8px_rgba(255,198,92,0.6)] backdrop-blur-md transition-colors hover:border-gold-400 sm:left-2"
             >
-              <span className="icon-tile-gold size-9">
-                <Cpu size={17} aria-hidden="true" />
+              <span className="icon-tile-gold size-7">
+                <Cpu size={14} aria-hidden="true" />
               </span>
               <span>
-                <span className="block font-display text-base font-bold text-foreground">Femxo Tech</span>
-                <span className="block text-xs text-muted-foreground">Web · Apps · AI</span>
+                <span className="block font-display text-sm font-bold text-foreground">Femxo Tech</span>
+                <span className="block text-[0.7rem] text-muted-foreground">Web · Apps · AI</span>
               </span>
               <ArrowRight
-                size={15}
+                size={13}
                 aria-hidden="true"
                 className="text-gold transition-transform group-hover:translate-x-0.5"
               />

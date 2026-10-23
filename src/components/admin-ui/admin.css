@@ -1,0 +1,1609 @@
+/*
+ * Femxo admin design system (the "Foundations" canvas).
+ *
+ * Everything is scoped to .fx-admin so the marketing site's tokens
+ * (globals.css, plum #84288C) and the admin tokens (purple #6C35A5) never
+ * clash. Depth comes from solid "shelf" shadows, not blur. Dark mode
+ * redefines the variables under `.dark` (the class the site's theme script
+ * puts on <html>), so components only ever use the tokens.
+ *
+ * Everything sits in Tailwind's `components` layer, so utilities such as
+ * `hidden md:flex` on the same element still win (unlayered CSS would beat
+ * every layered utility).
+ */
+
+@layer components {
+
+.fx-admin {
+  --fx-primary: #6c35a5;
+  --fx-primary-deep: #45216f;
+  --fx-primary-hover: #7a40b6;
+  --fx-ink: #12071f;
+  --fx-gold: #ffc45e;
+  --fx-gold-deep: #c98a22;
+  --fx-gold-text: #3a2205;
+  --fx-lavender: #d98cf0;
+  --fx-lavender-soft: #b98ae0;
+  --fx-lavender-surface: #f6f0fc;
+  --fx-bg: #f8f9fc;
+  --fx-surface: #ffffff;
+  --fx-text: #202033;
+  --fx-text-2: #666880;
+  --fx-border: #e8e7ef;
+  --fx-border-strong: #d9d6e4;
+  --fx-success: #168458;
+  --fx-warning: #c78317;
+  --fx-error: #d64545;
+
+  /* Status tints: text colours pass WCAG AA on their background. */
+  --fx-success-bg: #e2f4eb;
+  --fx-success-text: #0f6a46;
+  --fx-warning-bg: #fff0d4;
+  --fx-warning-text: #85550a;
+  --fx-error-bg: #fce6e6;
+  --fx-error-text: #b02e2e;
+  --fx-info-bg: #e9effd;
+  --fx-info-text: #2f55b5;
+  --fx-neutral-bg: #eeeef3;
+  --fx-neutral-text: #4f5166;
+
+  --fx-shelf-control: 0 3px 0 #e2deeb;
+  --fx-shelf-card: 0 1px 2px rgba(20, 14, 38, 0.04), 0 10px 28px -18px rgba(20, 14, 38, 0.14);
+  --fx-shelf-primary: 0 4px 0 var(--fx-primary-deep);
+  --fx-shelf-gold: 0 4px 0 var(--fx-gold-deep);
+  --fx-shelf-danger: 0 4px 0 #9e2c2c;
+  --fx-focus-ring: 0 0 0 3px var(--fx-gold);
+
+  --fx-radius-card: 16px;
+  --fx-radius-control: 12px;
+  --fx-font-display: var(--font-display), "Space Grotesk", system-ui, sans-serif;
+  --fx-font-ui: var(--font-inter), "Inter", system-ui, sans-serif;
+
+  /* Text and icons in the primary colour (links, purple badges). */
+  --fx-primary-text: #6c35a5;
+  /* Quieter surfaces: search field, table row hover, map backdrop. */
+  --fx-surface-2: #f4f3f8;
+  --fx-surface-hover: #fbf9fe;
+  --fx-note-border: #e7dcf5;
+  --fx-topbar-bg: rgba(255, 255, 255, 0.92);
+  --fx-placeholder: #9a9bb0;
+  --fx-disabled-text: #a3a4b5;
+  --fx-toggle-off: #e9e8f0;
+  --fx-skeleton-a: #efedf5;
+  --fx-skeleton-b: #f7f5fb;
+  --fx-shelf-overlay: #e3d6f3;
+  --fx-shelf-popover: #ece3f6;
+  --fx-step-ring: #fff3db;
+  --fx-env-bg: #fff4dc;
+  --fx-env-border: #f5d595;
+  --fx-env-text: #6b4307;
+  --fx-proto-border: #f3d79c;
+  /*
+   * Data viz. `accent` is the series a chart is about, `muted` its context
+   * (emphasis form). Categorical slots are in validated order (dataviz
+   * validator, on #ffffff and #1a1328): CVD-safe as adjacent pairs; slot 2 is
+   * under 3:1 on white, so charts using it show visible labels. Status steps
+   * mean good / warning / serious / critical only, the same in both modes.
+   */
+  --fx-viz-accent: #6c35a5;
+  --fx-viz-muted: #b8b0c9;
+  --fx-viz-grid: #eeecf3;
+  --fx-viz-axis: #8a8ca0;
+  --fx-viz-crosshair: #b9b3c8;
+  --fx-viz-track: #f1eef7;
+  --fx-viz-cat-1: #6c35a5;
+  --fx-viz-cat-2: #e09a2e;
+  --fx-viz-cat-3: #1c9a86;
+  --fx-viz-good: #0ca30c;
+  --fx-viz-warning: #fab219;
+  --fx-viz-serious: #ec835a;
+  --fx-viz-critical: #d03b3b;
+
+  --fx-sidebar-w: 272px;
+  --fx-rail-w: 72px;
+
+  color-scheme: light;
+  background: var(--fx-bg);
+  color: var(--fx-text);
+  font-family: var(--fx-font-ui);
+  font-size: 14px;
+  line-height: 1.45;
+  min-height: 100dvh;
+}
+
+/* Dark mode: same roles, night palette. Text pairs keep WCAG AA contrast. */
+.dark .fx-admin {
+  --fx-lavender-surface: #261c3a;
+  --fx-bg: #0f0a19;
+  --fx-surface: #1a1328;
+  --fx-text: #ece9f5;
+  --fx-text-2: #a9a6bd;
+  --fx-border: #2e2642;
+  --fx-border-strong: #3d3456;
+
+  --fx-success-bg: #12352a;
+  --fx-success-text: #74d8a8;
+  --fx-warning-bg: #3a2a0c;
+  --fx-warning-text: #f2c069;
+  --fx-error-bg: #3d1818;
+  --fx-error-text: #f39595;
+  --fx-info-bg: #172447;
+  --fx-info-text: #a3baf7;
+  --fx-neutral-bg: #2a2638;
+  --fx-neutral-text: #c6c3d6;
+
+  --fx-shelf-control: 0 3px 0 #08050f;
+  --fx-shelf-card: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 10px 28px -18px rgba(0, 0, 0, 0.7);
+
+  --fx-primary-text: #c9a2ef;
+  --fx-surface-2: #221a33;
+  --fx-surface-hover: #211931;
+  --fx-note-border: #3a2d55;
+  --fx-topbar-bg: rgba(20, 14, 32, 0.9);
+  --fx-placeholder: #7d7992;
+  --fx-disabled-text: #6f6b85;
+  --fx-toggle-off: #3a3250;
+  --fx-skeleton-a: #241c35;
+  --fx-skeleton-b: #2e2543;
+  --fx-shelf-overlay: #08050f;
+  --fx-shelf-popover: #08050f;
+  --fx-step-ring: #3a2a0c;
+  --fx-env-bg: #3a2a0c;
+  --fx-env-border: #6b4c16;
+  --fx-env-text: #f2c069;
+  --fx-proto-border: #6b4c16;
+  --fx-viz-accent: #a77be0;
+  --fx-viz-muted: #5a4f74;
+  --fx-viz-grid: #2a2340;
+  --fx-viz-axis: #8f8ba6;
+  --fx-viz-crosshair: #5f557a;
+  --fx-viz-track: #261e38;
+  --fx-viz-cat-1: #a77be0;
+  --fx-viz-cat-2: #bd8428;
+  --fx-viz-cat-3: #1d9a85;
+
+  color-scheme: dark;
+}
+
+.fx-admin *,
+.fx-admin *::before,
+.fx-admin *::after {
+  border-color: var(--fx-border);
+}
+
+.fx-admin :focus-visible {
+  outline: none;
+  --tw-ring-shadow: none;
+  box-shadow: var(--fx-focus-ring);
+}
+
+/* ---------- Typography ---------- */
+
+.fx-display {
+  font-family: var(--fx-font-display);
+  letter-spacing: -0.01em;
+}
+/* Headings are Inter, tightly tracked; the display face is kept for the wordmark. */
+.fx-h1 {
+  font-weight: 650;
+  font-size: clamp(26px, 2.4vw, 32px);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+.fx-h2 {
+  font-weight: 650;
+  font-size: 20px;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+.fx-card-title {
+  font-weight: 650;
+  font-size: 17px;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+}
+.fx-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fx-text-2);
+}
+.fx-helper {
+  font-size: 12px;
+  color: var(--fx-text-2);
+}
+.fx-muted {
+  color: var(--fx-text-2);
+}
+.fx-num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Surfaces ---------- */
+
+.fx-card {
+  background: var(--fx-surface);
+  border: 1px solid var(--fx-border);
+  border-radius: var(--fx-radius-card);
+  box-shadow: var(--fx-shelf-card);
+}
+.fx-card-pad {
+  padding: 20px;
+}
+
+.fx-chip-proto {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffd98a;
+  background: rgba(255, 196, 94, 0.14);
+  border: 1px solid rgba(255, 196, 94, 0.45);
+}
+.fx-chip-proto--light {
+  color: var(--fx-warning-text);
+  background: var(--fx-warning-bg);
+  border-color: var(--fx-proto-border);
+}
+
+/* ---------- Buttons ---------- */
+
+.fx-btn {
+  --fx-btn-shadow: var(--fx-shelf-control);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: var(--fx-radius-control);
+  border: 1px solid transparent;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: var(--fx-btn-shadow);
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.08s ease,
+    background-color 0.15s ease;
+  user-select: none;
+}
+.fx-btn:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+.fx-btn:focus-visible {
+  box-shadow: var(--fx-btn-shadow), var(--fx-focus-ring);
+}
+.fx-btn:disabled,
+.fx-btn[aria-disabled="true"] {
+  cursor: not-allowed;
+  background: var(--fx-surface);
+  color: var(--fx-disabled-text);
+  border-color: var(--fx-border);
+  box-shadow: none;
+}
+.fx-btn--sm {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 13px;
+  border-radius: 10px;
+}
+.fx-btn--lg {
+  height: 48px;
+  padding: 0 22px;
+  font-size: 15px;
+}
+.fx-btn--block {
+  width: 100%;
+}
+.fx-btn--icon {
+  width: 40px;
+  padding: 0;
+}
+
+.fx-btn--primary {
+  --fx-btn-shadow: var(--fx-shelf-primary);
+  background: linear-gradient(180deg, #7d43bd 0%, var(--fx-primary) 100%);
+  color: #fff;
+  border-color: var(--fx-primary-deep);
+}
+.fx-btn--primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, #8a4fca 0%, var(--fx-primary-hover) 100%);
+}
+.fx-btn--gold {
+  --fx-btn-shadow: var(--fx-shelf-gold);
+  background: linear-gradient(180deg, #ffd27f 0%, var(--fx-gold) 100%);
+  color: var(--fx-gold-text);
+  border-color: #e0a640;
+}
+.fx-btn--secondary {
+  background: var(--fx-surface);
+  color: var(--fx-text);
+  border-color: var(--fx-border-strong);
+}
+.fx-btn--secondary:hover:not(:disabled) {
+  background: var(--fx-lavender-surface);
+}
+.fx-btn--danger {
+  --fx-btn-shadow: var(--fx-shelf-danger);
+  background: linear-gradient(180deg, #e05656 0%, var(--fx-error) 100%);
+  color: #fff;
+  border-color: #b23636;
+}
+.fx-btn--ghost {
+  --fx-btn-shadow: none;
+  background: transparent;
+  color: var(--fx-text);
+}
+.fx-btn--ghost:hover:not(:disabled) {
+  background: var(--fx-lavender-surface);
+}
+
+/* Square icon buttons in the top bar. */
+.fx-icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--fx-surface);
+  border: 1px solid var(--fx-border);
+  box-shadow: var(--fx-shelf-control);
+  color: var(--fx-text);
+  position: relative;
+  cursor: pointer;
+}
+.fx-icon-btn:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+.fx-icon-btn .fx-dot {
+  position: absolute;
+  top: 9px;
+  right: 10px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--fx-gold);
+  border: 2px solid var(--fx-surface);
+}
+
+/* ---------- Badges ---------- */
+
+.fx-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.fx-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+}
+.fx-badge--plain::before {
+  display: none;
+}
+.fx-badge--success {
+  background: var(--fx-success-bg);
+  color: var(--fx-success-text);
+}
+.fx-badge--warning {
+  background: var(--fx-warning-bg);
+  color: var(--fx-warning-text);
+}
+.fx-badge--error {
+  background: var(--fx-error-bg);
+  color: var(--fx-error-text);
+}
+.fx-badge--info {
+  background: var(--fx-info-bg);
+  color: var(--fx-info-text);
+}
+.fx-badge--neutral {
+  background: var(--fx-neutral-bg);
+  color: var(--fx-neutral-text);
+}
+.fx-badge--gold {
+  background: var(--fx-gold);
+  color: var(--fx-gold-text);
+  box-shadow: 0 2px 0 var(--fx-gold-deep);
+}
+.fx-badge--purple {
+  background: var(--fx-lavender-surface);
+  color: var(--fx-primary-text);
+}
+
+.fx-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--fx-gold);
+  color: var(--fx-gold-text);
+}
+
+/* ---------- Form controls ---------- */
+
+.fx-field {
+  display: grid;
+  gap: 6px;
+}
+.fx-field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fx-text);
+}
+.fx-field-label .fx-req {
+  color: var(--fx-error);
+  margin-left: 2px;
+}
+.fx-input {
+  width: 100%;
+  height: 42px;
+  padding: 0 14px;
+  border-radius: var(--fx-radius-control);
+  border: 1px solid var(--fx-border-strong);
+  background: var(--fx-surface);
+  color: var(--fx-text);
+  font-size: 14px;
+  transition:
+    border-color 0.12s ease,
+    box-shadow 0.12s ease;
+}
+.fx-input::placeholder {
+  color: var(--fx-placeholder);
+}
+.fx-input:focus,
+.fx-input:focus-visible {
+  outline: none;
+  border-color: var(--fx-primary);
+  box-shadow: var(--fx-focus-ring);
+}
+.fx-input[aria-invalid="true"] {
+  border-color: var(--fx-error);
+  box-shadow: 0 0 0 3px rgba(214, 69, 69, 0.14);
+}
+select.fx-input {
+  appearance: none;
+  padding-right: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23666880' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+textarea.fx-input {
+  height: auto;
+  min-height: 88px;
+  padding: 10px 14px;
+  resize: vertical;
+}
+.fx-field-error {
+  font-size: 12px;
+  color: var(--fx-error-text);
+}
+
+.fx-check {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.fx-check input {
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  accent-color: var(--fx-primary);
+  flex: none;
+}
+
+.fx-toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  border: 1px solid var(--fx-border-strong);
+  background: var(--fx-toggle-off);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  flex: none;
+}
+.fx-toggle::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(18, 7, 31, 0.25);
+  transition: transform 0.15s ease;
+}
+.fx-toggle[aria-checked="true"] {
+  background: var(--fx-primary);
+  border-color: var(--fx-primary-deep);
+}
+.fx-toggle[aria-checked="true"]::after {
+  transform: translateX(20px);
+}
+
+/* Segmented control (the dashboard's date range). */
+.fx-segmented {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 12px;
+  background: var(--fx-surface-2);
+  border: 1px solid var(--fx-border);
+}
+.fx-segmented button {
+  height: 32px;
+  min-width: 44px;
+  padding: 0 12px;
+  border-radius: 9px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--fx-text-2);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+.fx-segmented button:hover {
+  color: var(--fx-text);
+}
+.fx-segmented button[aria-pressed="true"] {
+  background: var(--fx-surface);
+  color: var(--fx-text);
+  box-shadow:
+    0 1px 2px rgba(20, 14, 38, 0.08),
+    0 0 0 1px var(--fx-border);
+}
+
+.fx-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 14px;
+  background: var(--fx-surface);
+  border: 1px solid var(--fx-border);
+  box-shadow: var(--fx-shelf-control);
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+}
+.fx-tabs button {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--fx-text-2);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.fx-tabs button[aria-selected="true"] {
+  background: var(--fx-primary);
+  color: #fff;
+  box-shadow: 0 3px 0 var(--fx-primary-deep);
+}
+
+/* ---------- Data table ---------- */
+
+.fx-table-wrap {
+  overflow-x: auto;
+}
+.fx-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+}
+.fx-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--fx-lavender-surface);
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fx-text-2);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--fx-border);
+  white-space: nowrap;
+}
+.fx-table thead th button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.fx-table tbody td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--fx-border);
+  vertical-align: middle;
+}
+.fx-table tbody tr:hover td {
+  background: var(--fx-surface-hover);
+}
+.fx-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.fx-table .fx-right {
+  text-align: right;
+}
+
+.fx-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--fx-border);
+  font-size: 12px;
+  color: var(--fx-text-2);
+}
+.fx-pager button {
+  font-weight: 600;
+  color: var(--fx-text-2);
+  cursor: pointer;
+}
+.fx-pager button:hover:not(:disabled) {
+  color: var(--fx-primary-text);
+}
+.fx-pager button:disabled {
+  color: var(--fx-disabled-text);
+  cursor: not-allowed;
+}
+
+/* ---------- Overlays (native <dialog>) ---------- */
+
+.fx-dialog,
+.fx-drawer {
+  border: 0;
+  padding: 0;
+  color: var(--fx-text);
+  background: var(--fx-surface);
+  font-family: var(--fx-font-ui);
+  font-size: 14px;
+}
+.fx-dialog::backdrop,
+.fx-drawer::backdrop {
+  background: rgba(18, 7, 31, 0.45);
+}
+.fx-dialog {
+  width: min(520px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  border-radius: 22px;
+  border: 1px solid var(--fx-border);
+  box-shadow: 0 6px 0 var(--fx-shelf-overlay), 0 30px 60px -20px rgba(18, 7, 31, 0.45);
+}
+.fx-drawer {
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: min(480px, 100vw);
+  height: 100dvh;
+  max-height: 100dvh;
+  max-width: 100vw;
+  margin: 0;
+  border-left: 1px solid var(--fx-border);
+  box-shadow: -18px 0 40px -20px rgba(18, 7, 31, 0.35);
+}
+.fx-drawer[open] {
+  display: flex;
+  flex-direction: column;
+  animation: fx-slide-in 0.18s ease-out;
+}
+@keyframes fx-slide-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+}
+
+.fx-confirm-amount {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--fx-lavender-surface);
+  border: 1px solid var(--fx-note-border);
+}
+
+/* ---------- Timeline ---------- */
+
+.fx-timeline {
+  display: grid;
+  gap: 14px;
+}
+.fx-timeline li {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 12px;
+  align-items: start;
+}
+.fx-step {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--fx-neutral-bg);
+  color: var(--fx-neutral-text);
+}
+.fx-step--done {
+  background: var(--fx-success);
+  color: #fff;
+}
+.fx-step--current {
+  background: var(--fx-gold);
+  color: var(--fx-gold-text);
+  box-shadow: 0 0 0 4px var(--fx-step-ring);
+}
+.fx-step--failed {
+  background: var(--fx-error);
+  color: #fff;
+}
+
+/* ---------- Toast ---------- */
+
+.fx-toast-region {
+  position: fixed;
+  z-index: 60;
+  right: 16px;
+  bottom: 16px;
+  display: grid;
+  gap: 8px;
+  width: min(380px, calc(100vw - 32px));
+}
+@media (max-width: 767px) {
+  .fx-toast-region {
+    bottom: 88px;
+  }
+}
+.fx-toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #1c1530;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 4px 0 #0b0614, 0 16px 30px -12px rgba(18, 7, 31, 0.5);
+  animation: fx-toast-in 0.18s ease-out;
+}
+@keyframes fx-toast-in {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+}
+.fx-toast-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  flex: none;
+}
+
+/* ---------- States ---------- */
+
+.fx-skeleton {
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--fx-skeleton-a) 0%, var(--fx-skeleton-b) 50%, var(--fx-skeleton-a) 100%);
+  background-size: 200% 100%;
+  animation: fx-shimmer 1.2s linear infinite;
+}
+@keyframes fx-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+.fx-state-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  color: #fff;
+}
+.fx-state-icon--primary {
+  background: var(--fx-primary);
+  box-shadow: var(--fx-shelf-primary);
+}
+.fx-state-icon--error {
+  background: var(--fx-error);
+  box-shadow: var(--fx-shelf-danger);
+}
+.fx-state-icon--gold {
+  background: var(--fx-gold);
+  color: var(--fx-gold-text);
+  box-shadow: var(--fx-shelf-gold);
+}
+
+/* ---------- Shell ---------- */
+
+.fx-sidebar {
+  background:
+    radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1.2px) 0 0 / 22px 22px,
+    linear-gradient(180deg, #24103c 0%, #1a0b2c 40%, var(--fx-ink) 100%);
+  color: rgba(255, 255, 255, 0.86);
+  width: 100%;
+}
+
+/*
+ * VS Code-style scrollbar: invisible until the pointer is over the sidebar
+ * (or focus is inside it), then a thin thumb that never shifts the layout.
+ */
+.fx-scroll {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  scrollbar-gutter: stable;
+}
+.fx-scroll:hover,
+.fx-scroll:focus-within {
+  scrollbar-color: rgba(255, 255, 255, 0.24) transparent;
+}
+.fx-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.fx-scroll::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  background: transparent;
+}
+.fx-scroll:hover::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.24);
+}
+.fx-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* Collapsed "rail": icons only, the label stays for screen readers. */
+.fx-sidebar[data-rail="true"] .fx-nav-group {
+  height: 1px;
+  margin: 12px 10px;
+  padding: 0;
+  overflow: hidden;
+  font-size: 0;
+  background: rgba(255, 255, 255, 0.12);
+}
+.fx-sidebar[data-rail="true"] .fx-nav-link {
+  position: relative;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: 0 auto;
+  padding: 0;
+}
+.fx-sidebar[data-rail="true"] .fx-nav-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.fx-sidebar[data-rail="true"] .fx-count {
+  position: absolute;
+  top: 2px;
+  right: 0;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  font-size: 9.5px;
+  box-shadow: 0 0 0 2px var(--fx-ink);
+}
+.fx-nav-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Expand / collapse button at the foot of the sidebar. */
+.fx-sidebar-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+}
+.fx-sidebar-toggle:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+}
+.fx-sidebar[data-rail="true"] .fx-sidebar-toggle {
+  justify-content: center;
+  width: 44px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+/* The pinned sidebar animates between rail and full width (not while dragging). */
+.fx-shell-aside,
+.fx-shell-main {
+  transition:
+    width 0.18s ease,
+    padding-left 0.18s ease;
+}
+.fx-shell[data-resizing="true"] .fx-shell-aside,
+.fx-shell[data-resizing="true"] .fx-shell-main {
+  transition: none;
+}
+.fx-shell[data-resizing="true"] {
+  cursor: col-resize;
+  user-select: none;
+}
+
+/* Drag handle on the sidebar's edge ("sash"); lights up like VS Code's. */
+.fx-sash {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  z-index: 5;
+  width: 7px;
+  height: 100%;
+  cursor: col-resize;
+  touch-action: none;
+}
+.fx-sash::after {
+  content: "";
+  position: absolute;
+  inset: 0 2px;
+  background: transparent;
+  transition: background-color 0.15s ease 0.15s;
+}
+.fx-sash:hover::after,
+.fx-sash:focus-visible::after,
+.fx-shell[data-resizing="true"] .fx-sash::after {
+  background: var(--fx-gold);
+  transition-delay: 0s;
+}
+.fx-admin .fx-sash:focus-visible {
+  box-shadow: none;
+}
+/* In the drawer the sash sits just inside the edge (the dialog clips overflow). */
+.fx-sash--inset {
+  right: 0;
+}
+
+/* Three-dot grip in the middle of the sash. */
+.fx-sash-grip {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 12px;
+  height: 30px;
+  border-radius: 6px;
+  background: #2a1545;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.65);
+  transform: translate(-50%, -50%);
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+.fx-sash--inset .fx-sash-grip {
+  left: auto;
+  right: 1px;
+  transform: translateY(-50%);
+}
+.fx-sash-grip::before {
+  content: "";
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow:
+    0 -6px currentColor,
+    0 6px currentColor;
+}
+.fx-sash:hover .fx-sash-grip,
+.fx-sash:focus-visible .fx-sash-grip,
+.fx-shell[data-resizing="true"] .fx-sash-grip {
+  background: var(--fx-gold);
+  border-color: var(--fx-gold);
+  color: var(--fx-ink);
+}
+.fx-nav-group {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  padding: 0 12px;
+  margin: 18px 0 6px;
+}
+.fx-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.88);
+  transition: background-color 0.12s ease;
+}
+.fx-nav-link:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+.fx-nav-link[aria-current="page"] {
+  background: linear-gradient(180deg, #8448c6 0%, var(--fx-primary) 100%);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 3px 0 #2c1148;
+}
+.fx-nav-link svg {
+  flex: none;
+}
+.fx-nav-link .fx-count {
+  margin-left: auto;
+}
+
+.fx-sidebar-card {
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.fx-sidebar-card--proto {
+  background: rgba(255, 196, 94, 0.08);
+  border-color: rgba(255, 196, 94, 0.3);
+}
+
+.fx-topbar {
+  background: var(--fx-topbar-bg);
+  backdrop-filter: saturate(1.4) blur(8px);
+  border-bottom: 1px solid var(--fx-border);
+}
+.fx-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 44px;
+  padding: 0 8px 0 14px;
+  border-radius: 14px;
+  background: var(--fx-surface-2);
+  border: 1px solid var(--fx-border);
+  color: var(--fx-text-2);
+}
+.fx-search input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  font-size: 14px;
+  color: var(--fx-text);
+}
+.fx-search input:focus {
+  outline: none;
+  box-shadow: none;
+}
+.fx-search:focus-within {
+  border-color: var(--fx-primary);
+  box-shadow: var(--fx-focus-ring);
+}
+.fx-kbd {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 7px;
+  border-radius: 7px;
+  background: var(--fx-surface);
+  border: 1px solid var(--fx-border);
+  color: var(--fx-text-2);
+}
+.fx-env-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--fx-env-bg);
+  border: 1px solid var(--fx-env-border);
+  color: var(--fx-env-text);
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.fx-env-pill::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--fx-warning);
+}
+
+.fx-popover {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 260px;
+  padding: 8px;
+  border-radius: 16px;
+  background: var(--fx-surface);
+  border: 1px solid var(--fx-border);
+  box-shadow: 0 4px 0 var(--fx-shelf-popover), 0 20px 40px -18px rgba(18, 7, 31, 0.35);
+}
+/* Top bar menus: on phones, span the screen under the bar so none runs off an edge. */
+@media (max-width: 767px) {
+  .fx-popover.fx-popover--menu {
+    position: fixed;
+    top: 68px;
+    left: 16px;
+    right: 16px;
+    width: auto;
+    max-width: none;
+  }
+}
+.fx-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  text-align: left;
+  font-size: 13.5px;
+  color: var(--fx-text);
+  cursor: pointer;
+}
+.fx-menu-item:hover,
+.fx-menu-item[data-active="true"] {
+  background: var(--fx-lavender-surface);
+}
+
+.fx-bottom-nav {
+  background: var(--fx-surface);
+  border-top: 1px solid var(--fx-border);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.fx-bottom-nav a,
+.fx-bottom-nav button {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 8px 0;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fx-text-2);
+  cursor: pointer;
+}
+.fx-bottom-nav [aria-current="page"] {
+  background: linear-gradient(180deg, #8448c6 0%, var(--fx-primary) 100%);
+  color: #fff;
+  box-shadow: 0 3px 0 var(--fx-primary-deep);
+}
+
+/* ---------- Dashboard ---------- */
+
+.fx-dash {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+@media (min-width: 768px) {
+  .fx-dash {
+    gap: 20px;
+  }
+}
+
+/* Panels: a header row (title, description, legend / actions) and a body. */
+.fx-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.fx-panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 18px 20px 0;
+}
+.fx-panel-title {
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+.fx-panel-desc {
+  margin-top: 2px;
+  font-size: 12.5px;
+  color: var(--fx-text-2);
+}
+.fx-panel-body {
+  flex: 1;
+  min-width: 0;
+  padding: 16px 20px 20px;
+}
+
+/* The one number the dashboard leads with: same sans, proportional figures. */
+.fx-hero-figure {
+  font-size: clamp(36px, 4vw, 48px);
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.035em;
+}
+
+/* KPI tile */
+.fx-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 20px;
+  min-width: 0;
+}
+.fx-stat-value {
+  font-size: 28px;
+  font-weight: 650;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+/* Two tiles per row on phones: a tighter tile. */
+@media (max-width: 639px) {
+  .fx-stat {
+    padding: 14px;
+  }
+  .fx-stat-value {
+    font-size: 22px;
+  }
+}
+
+/* Change pill: colour = direction x whether that is good, always with a sign or arrow. */
+.fx-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.fx-delta--good {
+  background: var(--fx-success-bg);
+  color: var(--fx-success-text);
+}
+.fx-delta--bad {
+  background: var(--fx-error-bg);
+  color: var(--fx-error-text);
+}
+.fx-delta--flat {
+  background: var(--fx-neutral-bg);
+  color: var(--fx-neutral-text);
+}
+
+.fx-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fx-primary-text);
+  white-space: nowrap;
+}
+.fx-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Chart / table switch in a panel header. */
+.fx-view-toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  border: 1px solid var(--fx-border);
+  color: var(--fx-text-2);
+  cursor: pointer;
+}
+.fx-view-toggle:hover,
+.fx-view-toggle[aria-pressed="true"] {
+  background: var(--fx-lavender-surface);
+  color: var(--fx-primary-text);
+}
+.fx-table--compact thead th {
+  padding: 9px 12px;
+}
+.fx-table--compact tbody td {
+  padding: 9px 12px;
+}
+
+/* List rows that open a module. */
+.fx-row-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding-block: 8px;
+  border-radius: 10px;
+  transition: background-color 0.12s ease;
+}
+.fx-row-link:hover {
+  background: var(--fx-surface-hover);
+}
+.fx-count-pill {
+  display: inline-grid;
+  place-items: center;
+  min-width: 28px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 650;
+  background: var(--fx-neutral-bg);
+  color: var(--fx-text);
+}
+.fx-tone-dot {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 999px;
+}
+.fx-tone-dot--warning {
+  background: var(--fx-viz-warning);
+}
+.fx-tone-dot--error {
+  background: var(--fx-viz-critical);
+}
+.fx-tone-dot--info {
+  background: var(--fx-viz-accent);
+}
+
+.fx-spotlight {
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--fx-lavender-surface);
+  border: 1px solid var(--fx-note-border);
+}
+
+.fx-activity {
+  display: grid;
+}
+.fx-activity li {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+}
+/* The thread joining one avatar to the next. */
+.fx-activity li:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 15px;
+  top: 44px;
+  bottom: -6px;
+  width: 1px;
+  background: var(--fx-border);
+}
+.fx-avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--fx-primary-text);
+  background: var(--fx-lavender-surface);
+  border: 1px solid var(--fx-note-border);
+}
+
+/* ---------- Charts ---------- */
+
+.fx-viz {
+  outline: none;
+  touch-action: pan-y;
+}
+.fx-viz:focus-visible {
+  border-radius: 8px;
+}
+.fx-viz-grid {
+  stroke: var(--fx-viz-grid);
+  stroke-width: 1;
+}
+.fx-viz-tick {
+  fill: var(--fx-viz-axis);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.fx-viz-value {
+  fill: var(--fx-text);
+  font-size: 11px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.fx-viz-crosshair {
+  stroke: var(--fx-viz-crosshair);
+  stroke-width: 1;
+}
+/* The 2px surface ring that keeps markers legible where they cross lines. */
+.fx-viz-ring {
+  stroke: var(--fx-surface);
+  stroke-width: 2;
+}
+.fx-viz-column {
+  fill: var(--fx-viz-muted);
+  transition: fill 0.12s ease;
+}
+.fx-viz-column--accent {
+  fill: var(--fx-viz-accent);
+}
+.fx-viz-column[data-active="true"] {
+  fill: var(--fx-primary-hover);
+}
+.dark .fx-viz-column[data-active="true"] {
+  fill: #c3a1ef;
+}
+
+.fx-viz-tooltip {
+  position: absolute;
+  z-index: 10;
+  min-width: 168px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--fx-surface);
+  border: 1px solid var(--fx-border);
+  box-shadow: 0 12px 32px -12px rgba(20, 14, 38, 0.28);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.fx-viz-tooltip-title {
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: var(--fx-text-2);
+}
+.fx-viz-tooltip-value {
+  font-size: 13px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.fx-viz-tooltip-label {
+  font-size: 12px;
+  color: var(--fx-text-2);
+}
+.fx-viz-tooltip-footer {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--fx-border);
+  font-size: 12px;
+  color: var(--fx-text-2);
+}
+
+/* Horizontal bars: one colour, 4px rounded data-end, value at the tip. */
+.fx-barlist-track {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--fx-viz-track);
+}
+.fx-barlist-bar {
+  display: block;
+  height: 100%;
+  border-radius: 0 4px 4px 0;
+  background: var(--fx-viz-accent);
+  transition: width 0.3s ease;
+}
+
+/* Stacked part-to-whole bar: segments split by a 2px surface gap. */
+.fx-stack {
+  display: flex;
+  gap: 2px;
+  height: 14px;
+  overflow: hidden;
+  border-radius: 4px;
+}
+.fx-stack-part {
+  min-width: 3px;
+  flex-basis: 0;
+  transition:
+    opacity 0.15s ease,
+    flex-grow 0.3s ease;
+}
+.fx-stack-part[data-dim="true"] {
+  opacity: 0.35;
+}
+.fx-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 -8px;
+  padding: 7px 8px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+.fx-legend-row--active {
+  background: var(--fx-surface-hover);
+}
+
+/* Sparkline in a KPI tile: history quiet, the latest step in the accent. */
+.fx-spark-wash {
+  fill: var(--fx-viz-accent);
+  opacity: 0.07;
+}
+.fx-spark-line {
+  fill: none;
+  stroke: var(--fx-viz-muted);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.fx-spark-line--accent {
+  stroke: var(--fx-viz-accent);
+  stroke-width: 2;
+}
+.fx-spark-dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--fx-viz-accent);
+  box-shadow: 0 0 0 2px var(--fx-surface);
+  transform: translate(-50%, -50%);
+}
+
+/* ---------- Motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-admin *,
+  .fx-admin *::before,
+  .fx-admin *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+} /* @layer components */

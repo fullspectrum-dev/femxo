@@ -3,8 +3,8 @@ import { expect, test } from "@playwright/test";
 // Runs with NEXT_PUBLIC_AUTH_DEMO_MODE=true: no backend, the in-browser demo
 // answers with the same contract.
 
+// The Super Admin lands in the admin panel instead (admin-demo.spec.ts).
 const ROLE_WORKSPACES = [
-  ["Super Admin", "Command Centre"],
   ["Admin", "State Operations"],
   ["Warehouse", "Warehouse Desk"],
   ["Dealer", "Dealer Hub"],
