@@ -1,9 +1,23 @@
-# Femxo web app
+# Femxo frontend
 
-The Femxo website and account screens: a Next.js App Router frontend for
-[femxo-backend](../femxo-backend). The landing page explains the network; signed-in
-users get a role-based workspace page (announced as coming soon) built from
-what the backend says about their role and territory.
+The Femxo frontends for [femxo-backend](../femxo-backend), as a pnpm workspace
+(backend ADR 0003 keeps all frontends in this repository):
+
+| Package | What it is |
+|---|---|
+| `apps/web` | The website, sign-in and account screens, and the Super Admin panel (Next.js App Router, port 3001) |
+| `apps/web-customer` | The customer storefront (Next.js, port 3002), being built per [docs/storefront](docs/storefront/plan.md) |
+| `packages/shared` | API contracts, API client and adapters (mock / http), seed data |
+| `packages/ui` | Storefront design tokens and components |
+
+Workspace packages ship TypeScript source (no build step); Next compiles them.
+`NEXT_PUBLIC_API_MODE` (`mock` by default, or `http`) picks the storefront's
+API adapter at build time; any other value fails the build.
+
+In `apps/web` the landing page explains the network; signed-in users get a
+role-based workspace page (announced as coming soon) built from what the
+backend says about their role and territory, and the Super Admin gets the
+admin panel at `/admin`.
 
 ## Requirements and local setup
 
@@ -12,15 +26,16 @@ what the backend says about their role and territory.
 
 ```powershell
 pnpm install
-Copy-Item .env.example .env.local
-pnpm dev
+Copy-Item apps/web/.env.example apps/web/.env.local
+pnpm dev:web                      # website + admin on 3001
+pnpm dev:shop                     # storefront on 3002
 ```
 
 Open `http://localhost:3001`. The site runs on **dummy data** (demo mode) by
 default, locally and in production: sign-in runs in the browser with test
 accounts and no backend is called. To connect femxo-backend later, start it,
 set `NEXT_PUBLIC_AUTH_DEMO_MODE=false` and `FEMXO_API_ORIGIN`, and rebuild.
-Restart `pnpm dev` after changing `next.config.ts` or `.env.local`.
+Restart `pnpm dev:web` after changing `apps/web/next.config.ts` or `.env.local`.
 
 ## Routes
 
@@ -32,6 +47,7 @@ Restart `pnpm dev` after changing `next.config.ts` or `.env.local`.
 | `/change-password` | Required after an admin sets a temporary password; also voluntary |
 | `/forgot-password` | Explains that admins reset passwords (the backend has no self-service reset) |
 | `/account` | The signed-in user's workspace for their role, plus their current access |
+| `/admin/*` | Super Admin panel, all 17 modules (prototype data until the admin APIs exist) |
 
 Old URLs (`/register`, `/verify-otp`, `/reset-password`, `/{portal}/login` and so
 on) redirect to these.
@@ -60,7 +76,7 @@ backend's `TRUST_PROXY_HOPS` to count every proxy in front of it (load balancer
 
 ## Backend contract
 
-The client ([auth-client.ts](src/features/auth/services/auth-client.ts)) uses:
+The client ([auth-client.ts](apps/web/src/features/auth/services/auth-client.ts)) uses:
 
 | Endpoint | Use |
 |---|---|
@@ -78,7 +94,7 @@ Errors are `{ error: { code, message } }`; the client maps each code
 single-flight and serialised across tabs with a Web Lock, because the backend
 revokes the whole session when a rotated refresh token is reused.
 
-The workspace page picks a role from `roles` by name ([roles.ts](src/lib/roles.ts));
+The workspace page picks a role from `roles` by name ([roles.ts](apps/web/src/lib/roles.ts));
 a role with an unrecognised name gets a generic workspace.
 
 ## Demo accounts
@@ -86,28 +102,32 @@ a role with an unrecognised name gets a generic workspace.
 With demo mode on, `/login` offers one account per role (Super Admin, Admin,
 Warehouse, Dealer, Field staff, Sub-dealer, Customer) and a "First sign-in"
 account that must change its password. The demo
-([demo-backend.ts](src/features/auth/services/demo-backend.ts)) answers with the
+([demo-backend.ts](apps/web/src/features/auth/services/demo-backend.ts)) answers with the
 backend's shapes and error codes. Its passwords are public and grant nothing.
 Once the backend is connected (`NEXT_PUBLIC_AUTH_DEMO_MODE=false`), production
 builds replace it with a stub, so the demo accounts don't ship alongside real ones.
 
 ## Quality checks
 
+Run from the repo root; each command runs in every package that has it.
+
 ```powershell
 pnpm lint
 pnpm typecheck
 pnpm test                         # unit tests (Vitest)
-pnpm exec playwright install chromium
+pnpm --filter @femxo/web exec playwright install chromium
 pnpm test:e2e                     # mocked backend, demo off (port 3011)
 pnpm test:e2e:demo                # demo mode (port 3012)
-pnpm test:e2e:demo:production     # demo mode on a production build
+pnpm --filter @femxo/web test:e2e:demo:production   # demo mode on a production build
 pnpm build
 ```
 
 ## Deployment
 
-`pnpm build` produces a self-contained server in `.next/standalone`
-(`output: "standalone"`). With Docker:
+`pnpm build:web` produces a self-contained server in
+`apps/web/.next/standalone` (`output: "standalone"`). It is traced from the
+workspace root, so the server sits at `apps/web/server.js` inside that folder.
+Build the Docker image from the repo root:
 
 ```powershell
 docker build -t femxo-frontend --build-arg FEMXO_API_ORIGIN=http://api:3000 .
@@ -117,10 +137,11 @@ docker run -p 3001:3001 femxo-frontend
 Without Docker, copy the assets next to the server and run it:
 
 ```powershell
-pnpm build
-Copy-Item -Recurse public .next/standalone/
-Copy-Item -Recurse .next/static .next/standalone/.next/
-$env:PORT = 3001; node .next/standalone/server.js
+pnpm build:web
+cd apps/web
+Copy-Item -Recurse public .next/standalone/apps/web/
+Copy-Item -Recurse .next/static .next/standalone/apps/web/.next/
+$env:PORT = 3001; node .next/standalone/apps/web/server.js
 ```
 
 Serve it over HTTPS (the refresh cookie is `Secure`). Every response carries

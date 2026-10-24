@@ -1,5 +1,5 @@
 # dependencies
-/node_modules
+node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -9,18 +9,18 @@
 !.yarn/versions
 
 # testing
-/coverage
-/test-results/
-/playwright-report/
-/blob-report/
+coverage/
+test-results/
+playwright-report/
+blob-report/
 
 # Next.js generated output
-/.next*/
-/out/
+.next*/
+out/
 
 # production
-/build
-/dist/
+build/
+dist/
 
 # misc
 .DS_Store

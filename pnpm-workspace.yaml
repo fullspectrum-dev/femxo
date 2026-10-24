@@ -1,2 +1,17 @@
+packages:
+  - apps/*
+  - packages/*
+
 allowBuilds:
+  # tsx (runs the seed image script) uses esbuild; its install script only
+  # checks that the platform binary is present.
+  esbuild: true
   unrs-resolver: true
+
+# eslint-config-next loads `next` at runtime without declaring it. In a
+# workspace `next` isn't at the root any more, so declare it as a peer and
+# pnpm links each app's own `next` into it.
+packageExtensions:
+  eslint-config-next:
+    peerDependencies:
+      next: "*"

@@ -1,0 +1,60 @@
+/*
+ * Femxo storefront design tokens (Tailwind v4 theme).
+ *
+ * Every value here becomes a utility in apps that import this file:
+ * --color-primary → bg-primary / text-primary, --shadow-key → shadow-key,
+ * --radius-card → rounded-card. Components use only these tokens, so a
+ * palette change happens in one place. Text/background pairs are checked
+ * for WCAG AA in tokens.test.ts.
+ *
+ * Warmer than the admin panel: a cream page, white product cards, the
+ * brand purple for actions and gold for Prime and highlights.
+ */
+
+@theme {
+  /* Brand */
+  --color-primary: #6c35a5;
+  --color-primary-hover: #5a2b8c;
+  --color-primary-deep: #45216f;
+  --color-primary-soft: #f2eafb;
+  --color-on-primary: #ffffff;
+  --color-gold: #ffc45e;
+  --color-gold-deep: #c98a22;
+  --color-gold-soft: #fff3da;
+  --color-on-gold: #3a2205;
+
+  /* Text and surfaces */
+  --color-ink: #12071f;
+  --color-ink-muted: #5e566b;
+  --color-canvas: #fffaf4;
+  --color-surface: #ffffff;
+  --color-surface-sunken: #f6f0e8;
+  --color-line: #ede4d8;
+  --color-line-input: #8c8172;
+  --color-focus: #6c35a5;
+
+  /* Status: each text colour passes AA on its soft background and on white */
+  --color-success: #0e7a4e;
+  --color-success-soft: #e4f5ec;
+  --color-warning: #8a5300;
+  --color-warning-soft: #fff1d6;
+  --color-danger: #b42318;
+  --color-danger-soft: #fdecea;
+  --color-info: #2e54b4;
+  --color-info-soft: #eaf0fd;
+
+  /* Type: next/font exposes the faces as --font-inter / --font-space-grotesk */
+  --font-sans: var(--font-inter), "Inter", system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), "Space Grotesk", system-ui, sans-serif;
+
+  /* Shape */
+  --radius-card: 16px;
+  --radius-control: 12px;
+
+  /* Depth: the 3D "key" shelf under buttons, soft elevation for cards */
+  --shadow-key: 0 3px 0 0 #45216f;
+  --shadow-key-gold: 0 3px 0 0 #c98a22;
+  --shadow-key-neutral: 0 3px 0 0 #e4dacd;
+  --shadow-card: 0 1px 2px rgb(18 7 31 / 0.05), 0 8px 24px -16px rgb(18 7 31 / 0.18);
+  --shadow-raised: 0 24px 48px -16px rgb(18 7 31 / 0.35);
+}

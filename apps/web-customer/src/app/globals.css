@@ -1,0 +1,4 @@
+@import "tailwindcss";
+@import "@femxo/ui/tokens.css";
+/* Components from @femxo/ui use Tailwind classes too. */
+@source "../../../../packages/ui/src";
